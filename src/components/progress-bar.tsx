@@ -5,7 +5,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 interface ProgressBarProps {
   progress: number; // 0 to 100
-  colorVariant?: 'primary' | 'accent' | 'success' | 'secondary';
+  colorVariant?: 'primary' | 'accent' | 'success' | 'secondary' | 'discovery';
   height?: number;
   style?: ViewStyle;
 }
@@ -24,6 +24,7 @@ export function ProgressBar({
   if (colorVariant === 'accent') fillColor = theme.accent;
   else if (colorVariant === 'success') fillColor = theme.success;
   else if (colorVariant === 'secondary') fillColor = theme.secondary;
+  else if (colorVariant === 'discovery') fillColor = theme.discovery;
 
   return (
     <View

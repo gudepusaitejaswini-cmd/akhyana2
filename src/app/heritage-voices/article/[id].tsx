@@ -45,7 +45,7 @@ export default function ArticleDetailScreen() {
         {/* Navigation Bar */}
         <View style={styles.navBar}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={[styles.backBtnText, { color: colors.oliveDark }]}>← Back</Text>
+            <Text style={[styles.backBtnText, { color: colors.primary }]}>← Back</Text>
           </Pressable>
           <Pressable onPress={() => setReportModalVisible(true)} style={styles.reportBtn}>
             <Text style={[styles.reportBtnText, { color: colors.warning }]}>🚩 Report</Text>

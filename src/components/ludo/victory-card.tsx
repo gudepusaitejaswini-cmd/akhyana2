@@ -23,12 +23,12 @@ export function LudoVictoryCard({ winner, state, onReplay, onReturnToGames }: Lu
 
   return (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
-      <AnnotationTag label="Match complete" variant="highlight" />
+      <AnnotationTag label="Match complete" variant="action" />
       <ThemedText type="editorialHeader">{winner.name} holds the board.</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
         {winner.civilizationName}
       </ThemedText>
-      <ThemedText type="statValue">{state.xp[key] ?? 0}</ThemedText>
+      <ThemedText type="statValue" style={{ color: theme.accent }}>{state.xp[key] ?? 0}</ThemedText>
       <ThemedText type="caption" themeColor="textMuted">
         Session XP
       </ThemedText>
@@ -40,7 +40,7 @@ export function LudoVictoryCard({ winner, state, onReplay, onReturnToGames }: Lu
           Duels won: {duels} / {state.duelsFought} fought
         </ThemedText>
       </View>
-      <Button title="Play again" onPress={onReplay} />
+      <Button title="Play again" variant="action" onPress={onReplay} />
       <Button title="Return to Games" variant="outline" onPress={onReturnToGames} />
     </View>
   );

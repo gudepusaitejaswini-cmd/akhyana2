@@ -57,7 +57,7 @@ export default function TopicDetailScreen() {
 
           {/* Hero */}
           <View style={styles.hero}>
-            <AnnotationTag label={positionLabel} variant="highlight" />
+            <AnnotationTag label={positionLabel} variant="discovery" />
             <ThemedText type="heroDisplay" style={styles.title}>
               {topic.title}
             </ThemedText>
@@ -80,7 +80,7 @@ export default function TopicDetailScreen() {
             <View
               style={[
                 styles.evidenceCard,
-                { backgroundColor: theme.backgroundElement, borderLeftColor: theme.primary },
+                { backgroundColor: theme.card, borderColor: theme.cardBorder, borderWidth: 1, borderLeftColor: theme.discovery, borderLeftWidth: 4 },
               ]}>
               <ThemedText type="small" themeColor="textSecondary">
                 {topic.significance}
@@ -116,17 +116,17 @@ export default function TopicDetailScreen() {
                         padding: Spacing.four,
                         borderRadius: 12,
                         borderWidth: 1,
-                        borderColor: theme.border,
+                        borderColor: theme.cardBorder,
                         backgroundColor: theme.card,
                         gap: Spacing.one
                       },
                       pressed && { opacity: 0.7 }
                     ]}
                   >
-                    <ThemedText type="annotation" style={{ color: theme.accent }}>
+                    <ThemedText type="annotation" style={{ color: theme.discovery }}>
                       0{index + 1}
                     </ThemedText>
-                    <ThemedText type="cardTitle" style={{ fontSize: 18 }}>
+                    <ThemedText type="cardTitle" style={{ fontSize: 18, color: theme.primary }}>
                       {subtopic.title}
                     </ThemedText>
                     <ThemedText type="small" themeColor="textSecondary" numberOfLines={2}>

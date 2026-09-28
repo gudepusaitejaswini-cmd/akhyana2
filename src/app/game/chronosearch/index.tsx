@@ -67,8 +67,8 @@ export default function ChronoSearchScreen() {
                     style={[
                       styles.decadeChip,
                       {
-                        backgroundColor: isSelected ? theme.accent : theme.card,
-                        borderColor: isSelected ? theme.accent : theme.cardBorder,
+                        backgroundColor: isSelected ? theme.primary : theme.card,
+                        borderColor: isSelected ? theme.primary : theme.cardBorder,
                       },
                     ]}>
                     <ThemedText
@@ -102,13 +102,13 @@ export default function ChronoSearchScreen() {
                   <View style={styles.cardHeaderRow}>
                     <AnnotationTag
                       label={puzzle.year ? `YEAR ${puzzle.year}` : `${activeDecadeGroup.displayLabel}`}
-                      variant="highlight"
+                      variant="discovery"
                     />
                     <ThemedText type="annotation" themeColor="textMuted">
                       {puzzle.words.length} HISTORICAL WORDS
                     </ThemedText>
                   </View>
-                  <ThemedText type="cardTitle" style={styles.cardTitle}>
+                  <ThemedText type="cardTitle" style={[styles.cardTitle, { color: theme.primary }]}>
                     {puzzle.title}
                   </ThemedText>
                   {puzzle.description ? (
@@ -116,7 +116,7 @@ export default function ChronoSearchScreen() {
                       {puzzle.description}
                     </ThemedText>
                   ) : null}
-                  <ThemedText type="smallBold" style={[styles.cta, { color: theme.accent }]}>
+                  <ThemedText type="smallBold" style={[styles.cta, { color: theme.secondary }]}>
                     Play {puzzle.year ? `${puzzle.year} Puzzle` : 'Puzzle'} →
                   </ThemedText>
                 </EditorialCard>
@@ -141,15 +141,15 @@ export default function ChronoSearchScreen() {
                   variant="muted"
                   onPress={() => router.push(`/game/chronosearch/${puzzle.id}`)}>
                   <View style={styles.cardHeaderRow}>
-                    <AnnotationTag label="ANCIENT / CLASSICAL" variant="default" />
+                    <AnnotationTag label="ANCIENT / CLASSICAL" variant="discovery" />
                     <ThemedText type="annotation" themeColor="textMuted">
                       {puzzle.words.length} WORDS
                     </ThemedText>
                   </View>
-                  <ThemedText type="smallBold" style={styles.cardTitle}>
+                  <ThemedText type="smallBold" style={[styles.cardTitle, { color: theme.primary }]}>
                     {puzzle.title}
                   </ThemedText>
-                  <ThemedText type="smallBold" style={[styles.cta, { color: theme.textSecondary }]}>
+                  <ThemedText type="smallBold" style={[styles.cta, { color: theme.secondary }]}>
                     Play Era Puzzle →
                   </ThemedText>
                 </EditorialCard>

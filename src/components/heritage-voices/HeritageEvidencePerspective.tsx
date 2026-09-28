@@ -22,14 +22,14 @@ export function HeritageEvidencePerspective({ evidenceSummary, authorPerspective
             Transparently separating archaeological evidence from analytical interpretations
           </Text>
         </View>
-        <Text style={[styles.toggleText, { color: colors.oliveDark }]}>{expanded ? '▲ Hide' : '▼ View'}</Text>
+        <Text style={[styles.toggleText, { color: colors.primary }]}>{expanded ? '▲ Hide' : '▼ View'}</Text>
       </Pressable>
 
       {expanded && (
         <View style={styles.body}>
           {evidenceSummary && (
-            <View style={[styles.subSection, { borderLeftColor: colors.primary }]}>
-              <Text style={[styles.subTitle, { color: colors.primary }]}>ARCHAEOLOGICAL / HISTORICAL EVIDENCE</Text>
+            <View style={[styles.subSection, { borderLeftColor: colors.discovery }]}>
+              <Text style={[styles.subTitle, { color: colors.discovery }]}>ARCHAEOLOGICAL / HISTORICAL EVIDENCE</Text>
               <Text style={[styles.content, { color: colors.text }]}>{evidenceSummary}</Text>
             </View>
           )}

@@ -47,7 +47,7 @@ export function LudoTurnBar({
         <View style={[styles.dice, { borderColor: theme.primary, backgroundColor: theme.primaryLight }]}>
           <ThemedText type="editorialHeader">{shown ?? '—'}</ThemedText>
         </View>
-        <Button title="Challenge" size="sm" onPress={onRoll} disabled={!canRoll || busy} />
+        <Button title="Challenge" size="sm" variant="action" onPress={onRoll} disabled={!canRoll || busy} />
       </View>
       <ThemedText type="caption" themeColor="textSecondary" style={styles.hint}>
         {hint}

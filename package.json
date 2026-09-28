@@ -29,6 +29,8 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~57.0.2",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -40,7 +42,10 @@
     "lint": "expo lint",
     "test:chronosearch": "npx tsx test_chronosearch.ts",
     "test:device-matrix": "npx tsx test_device_matrix.ts",
-    "test": "npx tsx test_chronosearch.ts && npx tsx test_device_matrix.ts"
+    "test:ludo": "npx tsx test_ludo_gameplay.ts",
+    "test:qa": "npx tsx test_full_qa.ts",
+    "test:aaj": "npx tsx test_aaj_ka_akhyana.ts",
+    "test": "npx tsx test_chronosearch.ts && npx tsx test_device_matrix.ts && npx tsx test_ludo_gameplay.ts && npx tsx test_full_qa.ts && npx tsx test_aaj_ka_akhyana.ts"
   },
   "private": true
 }

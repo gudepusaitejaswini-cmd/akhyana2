@@ -20,18 +20,18 @@ export function ChronoSearchDiscoveryCard({ word, xpEarned, onContinue }: Chrono
   return (
     <View style={styles.overlay}>
       <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
-        <AnnotationTag label="Historical discovery" variant="highlight" />
+        <AnnotationTag label="Historical discovery" variant="discovery" />
         <ThemedText type="editorialHeader">{word.displayLabel}</ThemedText>
-        <ThemedText type="annotation" style={{ color: theme.accent }}>
+        <ThemedText type="annotation" style={{ color: theme.discovery }}>
           {word.category.toUpperCase()}
         </ThemedText>
         <ThemedText type="small" themeColor="textSecondary" style={styles.body}>
           {word.explanation}
         </ThemedText>
-        <ThemedText type="smallBold" style={{ color: theme.primary }}>
+        <ThemedText type="smallBold" style={{ color: theme.accent }}>
           +{xpEarned} XP
         </ThemedText>
-        <Button title="Continue" onPress={onContinue} />
+        <Button title="Continue" variant="action" onPress={onContinue} />
       </View>
     </View>
   );
@@ -40,7 +40,7 @@ export function ChronoSearchDiscoveryCard({ word, xpEarned, onContinue }: Chrono
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(36, 54, 36, 0.35)',
+    backgroundColor: 'rgba(36, 59, 100, 0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.four,

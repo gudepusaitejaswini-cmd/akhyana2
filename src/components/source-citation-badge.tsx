@@ -23,8 +23,8 @@ export function SourceCitationBadge({ sources = [] }: SourceCitationBadgeProps) 
     <>
       <Pressable
         onPress={() => setModalVisible(true)}
-        style={({ pressed }) => [styles.trigger, { backgroundColor: theme.olivePale, borderColor: theme.border }, pressed && styles.pressed]}>
-        <ThemedText type="annotation" style={{ color: theme.secondary }}>
+        style={({ pressed }) => [styles.trigger, { backgroundColor: theme.discoveryLight, borderColor: theme.discovery }, pressed && styles.pressed]}>
+        <ThemedText type="annotation" style={{ color: theme.discoveryText }}>
           {sources.length === 1 ? '1 VERIFIED SOURCE' : `${sources.length} VERIFIED SOURCES`}
         </ThemedText>
       </Pressable>
@@ -40,10 +40,10 @@ export function SourceCitationBadge({ sources = [] }: SourceCitationBadgeProps) 
             style={[styles.modalContent, { borderColor: theme.borderStrong }]}>
             <View style={styles.modalHeader}>
               <View style={styles.titleColumn}>
-                <ThemedText type="annotation" style={{ color: theme.accent }}>
+                <ThemedText type="annotation" style={{ color: theme.discovery }}>
                   [ARCHIVAL VERIFICATION]
                 </ThemedText>
-                <ThemedText type="cardTitle">
+                <ThemedText type="cardTitle" style={{ color: theme.primary }}>
                   Accredited Historical Evidence
                 </ThemedText>
               </View>

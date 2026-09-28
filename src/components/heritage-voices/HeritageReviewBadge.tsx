@@ -54,8 +54,8 @@ export function HeritageReviewBadge({ status, showExplanation = false }: Props) 
   if (status === 'under_review') {
     return (
       <View style={styles.container}>
-        <View style={[styles.badge, { backgroundColor: '#FDE8E8', borderColor: '#E53E3E' }]}>
-          <Text style={[styles.badgeText, { color: '#9B2C2C' }]}>⚠ Under Review</Text>
+        <View style={[styles.badge, { backgroundColor: colors.errorLight, borderColor: colors.error }]}>
+          <Text style={[styles.badgeText, { color: colors.error }]}>⚠ Under Review</Text>
         </View>
         {showExplanation && (
           <Text style={[styles.explanation, { color: colors.textSecondary }]}>

@@ -207,6 +207,8 @@ export const INITIAL_HERITAGE_ARTICLES: HeritageArticle[] = [
   },
 ];
 
+export const HERITAGE_ARTICLES = INITIAL_HERITAGE_ARTICLES;
+
 let localArticles: HeritageArticle[] = [...INITIAL_HERITAGE_ARTICLES];
 let localReports: HeritageReport[] = [];
 

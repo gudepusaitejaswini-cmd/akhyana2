@@ -53,8 +53,13 @@ export function createLudoGame(players: LudoPlayerConfig[]): LudoGameState {
     players,
     tokens,
     currentSeat: players[0].seat,
-    phase: 'rolling',
+    phase: 'pass_turn',
+    earnedSteps: 0,
     diceValue: null,
+    rawDiceRoll: null,
+    turnQuestions: [],
+    currentQuestionIndex: 0,
+    correctAnswersCount: 0,
     hasRolled: false,
     consecutiveSixes: 0,
     usedQuestionIds: [],
@@ -68,6 +73,7 @@ export function createLudoGame(players: LudoPlayerConfig[]): LudoGameState {
     pendingQuestion: null,
     winnerSeat: null,
     turnNonce: 0,
+    lastTurnSummary: null,
   };
 }
 
@@ -83,11 +89,16 @@ export function isSafeTrack(trackIndex: number): boolean {
   return SAFE.has(trackIndex);
 }
 
-export function destinationDistance(token: LudoToken, dice: number): number | null {
+export function destinationDistance(token: LudoToken, steps: number): number | null {
+  if (steps <= 0) return null;
   if (token.distance < 0) {
-    return dice === ENTER_ROLL ? 0 : null;
+    // 1 step places token on the starting track cell (distance 0).
+    // N steps places token at distance N - 1.
+    const dest = steps - 1;
+    if (dest > FINISH_DISTANCE) return null;
+    return dest;
   }
-  const next = token.distance + dice;
+  const next = token.distance + steps;
   if (next > FINISH_DISTANCE) return null;
   return next;
 }
@@ -132,18 +143,23 @@ export function captureTarget(
 }
 
 export function legalTokenIds(state: LudoGameState): string[] {
-  if (state.phase !== 'selecting' || state.diceValue === null) return [];
-  const dice = state.diceValue;
+  const steps = state.earnedSteps || state.diceValue || 0;
+  if (state.phase !== 'selecting' || steps <= 0) return [];
+  return legalTokenIdsWithDistance(state, steps);
+}
+
+export function legalTokenIdsWithDistance(state: LudoGameState, distance: number): string[] {
+  if (distance <= 0) return [];
   return tokensForSeat(state, state.currentSeat)
     .filter((token) => {
-      const next = destinationDistance(token, dice);
+      const next = destinationDistance(token, distance);
       if (next === null) return false;
       return canLand(state, token, next);
     })
     .map((token) => token.id);
 }
 
-function nextSeat(state: LudoGameState, from: LudoSeat): LudoSeat {
+export function nextSeat(state: LudoGameState, from: LudoSeat): LudoSeat {
   const seats = state.players.map((player) => player.seat);
   const index = seats.indexOf(from);
   return seats[(index + 1) % seats.length];
@@ -161,7 +177,7 @@ function grantXp(state: LudoGameState, seat: LudoSeat, amount: number): LudoGame
   };
 }
 
-function hasWon(state: LudoGameState, seat: LudoSeat): boolean {
+export function hasWon(state: LudoGameState, seat: LudoSeat): boolean {
   return tokensForSeat(state, seat).every((token) => token.distance >= FINISH_DISTANCE);
 }
 
@@ -169,10 +185,15 @@ function beginTurn(state: LudoGameState, seat: LudoSeat): LudoGameState {
   return {
     ...state,
     currentSeat: seat,
-    phase: 'rolling',
+    phase: 'pass_turn',
+    earnedSteps: 0,
     diceValue: null,
+    rawDiceRoll: null,
     hasRolled: false,
     consecutiveSixes: 0,
+    turnQuestions: [],
+    currentQuestionIndex: 0,
+    correctAnswersCount: 0,
     pendingCapture: null,
     pendingDiscovery: null,
     pendingQuestion: null,
@@ -181,35 +202,22 @@ function beginTurn(state: LudoGameState, seat: LudoSeat): LudoGameState {
 }
 
 export function rollDice(state: LudoGameState, value: number): LudoGameState {
-  if (state.phase !== 'rolling' || state.hasRolled) return state;
+  if (state.phase !== 'pass_turn' || state.hasRolled) return state;
   if (value < 0 || value > 6) return state;
 
   if (value === 0) {
     return beginTurn(state, nextSeat(state, state.currentSeat));
   }
 
-  if (value === ENTER_ROLL && state.consecutiveSixes + 1 >= MAX_CONSECUTIVE_SIXES) {
-    return beginTurn(state, nextSeat(state, state.currentSeat));
-  }
-
-  const consecutiveSixes = value === ENTER_ROLL ? state.consecutiveSixes + 1 : 0;
   const selecting: LudoGameState = {
     ...state,
+    earnedSteps: value,
     diceValue: value,
     hasRolled: true,
-    consecutiveSixes,
     phase: 'selecting',
   };
 
   if (legalTokenIds(selecting).length === 0) {
-    if (value === ENTER_ROLL) {
-      return {
-        ...selecting,
-        phase: 'rolling',
-        diceValue: null,
-        hasRolled: false,
-      };
-    }
     return beginTurn(selecting, nextSeat(selecting, selecting.currentSeat));
   }
 
@@ -221,12 +229,13 @@ export function applyTokenMove(
   tokenId: string,
   discoveries: LudoDiscoveryRecord[],
 ): LudoGameState {
-  if (state.phase !== 'selecting' || state.diceValue === null) return state;
+  const steps = state.earnedSteps || state.diceValue || 0;
+  if (state.phase !== 'selecting' || steps <= 0) return state;
   if (!legalTokenIds(state).includes(tokenId)) return state;
 
   const token = tokenById(state, tokenId);
   if (!token) return state;
-  const nextDistance = destinationDistance(token, state.diceValue);
+  const nextDistance = destinationDistance(token, steps);
   if (nextDistance === null) return state;
 
   const moved: LudoGameState = {
@@ -367,17 +376,6 @@ export function collectDiscovery(
 
 function advanceAfterAction(state: LudoGameState): LudoGameState {
   if (state.winnerSeat !== null) return state;
-  if (state.diceValue === ENTER_ROLL) {
-    return {
-      ...state,
-      phase: 'rolling',
-      diceValue: null,
-      hasRolled: false,
-      pendingCapture: null,
-      pendingDiscovery: null,
-      pendingQuestion: null,
-    };
-  }
   return beginTurn(state, nextSeat(state, state.currentSeat));
 }
 
@@ -405,7 +403,7 @@ export function currentPlayer(state: LudoGameState): LudoPlayerConfig {
   return state.players.find((player) => player.seat === state.currentSeat) ?? state.players[0];
 }
 
-export const DUEL_MS = 5000;
+export const DUEL_MS = 10000;
 
 export function evaluateDuelAnswers(input: {
   correctIndex: number;
@@ -432,6 +430,14 @@ export function evaluateDuelAnswers(input: {
   }
   if (attackerCorrect) return 'attacker';
   if (defenderCorrect) return 'defender';
+
+  // If attacker answered and was incorrect, defender holds position immediately
+  if (input.attackerChoice !== null && !attackerCorrect) {
+    return 'defender';
+  }
+  if (input.defenderChoice !== null && !defenderCorrect) {
+    return 'attacker';
+  }
 
   const bothAnswered = input.attackerChoice !== null && input.defenderChoice !== null;
   if (bothAnswered || input.elapsedMs >= DUEL_MS) return 'none';

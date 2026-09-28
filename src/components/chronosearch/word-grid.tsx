@@ -156,7 +156,7 @@ export function ChronoSearchWordGrid({
         styles.board,
         {
           backgroundColor: theme.card,
-          borderColor: invalidSelection ? theme.accent : theme.cardBorder,
+          borderColor: invalidSelection ? theme.error : theme.cardBorder,
         },
       ]}
       {...panResponder.panHandlers}>
@@ -173,14 +173,14 @@ export function ChronoSearchWordGrid({
             let opacity = 1;
 
             if (isFound) {
-              backgroundColor = '#50613E'; // Forest olive
-              color = '#FFFFFF';
+              backgroundColor = theme.discovery; // Muted Teal discovery
+              color = theme.surface;
               borderRadius = 10;
             } else if (isSelected) {
-              backgroundColor = invalidSelection ? theme.accent : '#7D7246'; // Warm ochre
-              color = '#FFFFFF';
+              backgroundColor = invalidSelection ? theme.error : theme.secondary; // Terracotta drag / Red error
+              color = theme.surface;
               borderRadius = 10;
-              opacity = 0.9;
+              opacity = 0.95;
             }
 
             return (
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: BorderRadius.xl,
     padding: 4,
-    backgroundColor: '#EBEBE3',
+    backgroundColor: '#FFFDF7',
     // @ts-ignore
     userSelect: 'none',
   },

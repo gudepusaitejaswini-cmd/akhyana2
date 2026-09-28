@@ -17,17 +17,20 @@ export default function AppTabs() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.cardBorder,
-          elevation: 0,
-          shadowOpacity: 0.1,
+          elevation: 2,
+          shadowColor: colors.primary,
+          shadowOpacity: 0.06,
+          shadowOffset: { width: 0, height: -2 },
+          shadowRadius: 8,
           height: 60 + bottomInset,
           paddingBottom: bottomInset,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: colors.oliveDeep,
-        tabBarInactiveTintColor: colors.oliveMuted,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.mutedText,
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '600',
+          fontWeight: '700',
           marginTop: 2,
         },
       }}
@@ -60,6 +63,15 @@ export default function AppTabs() {
         }}
       />
       <Tabs.Screen
+        name="aaj-ka-akhyana"
+        options={{
+          title: 'Aaj',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="📜" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="heritage-voices"
         options={{
           title: 'Voices',
@@ -83,23 +95,20 @@ export default function AppTabs() {
 
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
   const colors = Colors.light;
-  
-  // Render the actual emoji characters directly as visible text/glyphs.
-  // We use color to tint on supporting platforms, but omit shadow/opacity hacks
-  // that cause emojis to vanish or render as pale circular blobs on Android.
+
   return (
     <View style={[
       styles.iconContainer, 
-      focused && { backgroundColor: colors.sageLight }
+      focused && { backgroundColor: colors.primaryLight }
     ]}>
       <Text style={{
         fontSize: 22,
-        color: focused ? colors.oliveDeep : colors.oliveDark,
         textAlign: 'center',
         includeFontPadding: false,
       }}>
         {name}
       </Text>
+      {focused && <View style={[styles.activeDot, { backgroundColor: colors.accent }]} />}
     </View>
   );
 }
@@ -107,9 +116,15 @@ function TabIcon({ name, focused }: { name: string; focused: boolean }) {
 const styles = StyleSheet.create({
   iconContainer: {
     paddingHorizontal: Spacing.three,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 999,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  activeDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 2,
   },
 });

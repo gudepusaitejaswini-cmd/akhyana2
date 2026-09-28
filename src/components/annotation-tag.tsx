@@ -6,7 +6,7 @@ import { useTheme } from '@/hooks/use-theme';
 
 interface AnnotationTagProps {
   label: string;
-  variant?: 'default' | 'accent' | 'highlight';
+  variant?: 'default' | 'accent' | 'highlight' | 'discovery' | 'action' | 'success' | 'error';
   style?: ViewStyle;
 }
 
@@ -14,16 +14,33 @@ export function AnnotationTag({ label, variant = 'default', style }: AnnotationT
   const theme = useTheme();
 
   let textColor: string = theme.textSecondary;
-  let backgroundColor: string = theme.olivePale;
+  let backgroundColor: string = theme.backgroundElement;
   let borderColor: string = theme.border;
-  if (variant === 'accent') textColor = theme.accent;
+
   if (variant === 'accent') {
+    textColor = theme.accentText;
     backgroundColor = theme.accentLight;
-    borderColor = theme.sage;
+    borderColor = theme.accent;
   } else if (variant === 'highlight') {
     textColor = theme.primary;
     backgroundColor = theme.primaryLight;
+    borderColor = theme.primary;
+  } else if (variant === 'discovery') {
+    textColor = theme.discoveryText;
+    backgroundColor = theme.discoveryLight;
+    borderColor = theme.discovery;
+  } else if (variant === 'action') {
+    textColor = theme.secondary;
+    backgroundColor = theme.secondaryLight;
     borderColor = theme.secondary;
+  } else if (variant === 'success') {
+    textColor = theme.success;
+    backgroundColor = theme.successLight;
+    borderColor = theme.success;
+  } else if (variant === 'error') {
+    textColor = theme.error;
+    backgroundColor = theme.errorLight;
+    borderColor = theme.error;
   }
 
   return (

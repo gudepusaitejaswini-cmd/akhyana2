@@ -27,6 +27,9 @@ export default function AppTabs() {
           <TabTrigger name="explore" href="/explore" asChild>
             <TabButton>EXPLORE</TabButton>
           </TabTrigger>
+          <TabTrigger name="aaj-ka-akhyana" href="/aaj-ka-akhyana" asChild>
+            <TabButton>AAJ KA AKHYANA</TabButton>
+          </TabTrigger>
           <TabTrigger name="heritage-voices" href="/heritage-voices" asChild>
             <TabButton>VOICES</TabButton>
           </TabTrigger>
@@ -43,19 +46,19 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
   const colors = Colors.light;
 
   return (
-    <Pressable {...props} style={({ pressed }) => [styles.tabButton, isFocused && { backgroundColor: colors.sageLight }, pressed && styles.pressed]}>
+    <Pressable {...props} style={({ pressed }) => [styles.tabButton, isFocused && { backgroundColor: colors.primaryLight }, pressed && styles.pressed]}>
       <ThemedText
         type="label"
         style={[
           styles.tabLabel,
           {
-            color: isFocused ? colors.primary : colors.textMuted,
+            color: isFocused ? colors.primary : colors.mutedText,
             fontWeight: isFocused ? '800' : '600',
           },
         ]}>
         {children}
       </ThemedText>
-      {isFocused && <View style={[styles.indicatorDot, { backgroundColor: colors.olive }]} />}
+      {isFocused && <View style={[styles.indicatorDot, { backgroundColor: colors.accent }]} />}
     </Pressable>
   );
 }

@@ -15,7 +15,7 @@ import { setLudoSetup } from '@/games/ludo/session';
 import { LudoPlayerConfig } from '@/games/ludo/types';
 import { useTheme } from '@/hooks/use-theme';
 
-const PLAYER_COLORS = ['#C05621', '#2B6CB0', '#2F855A', '#B7791F'];
+const PLAYER_COLORS = ['#243B64', '#C96B4B', '#D4A84F', '#3F7C78'];
 const POPULAR_YEARS = [1950, 1951, 1952, 1953, 1954, 1955, 1956, 1957, 1958, 1959];
 
 export default function LudoSetupScreen() {
@@ -25,6 +25,7 @@ export default function LudoSetupScreen() {
   const [count, setCount] = useState<2 | 3 | 4>(2);
   const [selectedYear, setSelectedYear] = useState<number>(1956);
   const [customYearInput, setCustomYearInput] = useState<string>('');
+  const [playerNames, setPlayerNames] = useState<string[]>(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
 
   const seats = useMemo(() => seatsForPlayerCount(count), [count]);
   const availableYears = useMemo(() => getYearsWithQuestions(), []);
@@ -37,14 +38,27 @@ export default function LudoSetupScreen() {
 
   const yearHasQuestions = useMemo(() => hasYearQuestions(effectiveYear), [effectiveYear]);
 
+  const handleNameChange = (text: string, index: number) => {
+    setPlayerNames((prev) => {
+      const copy = [...prev];
+      copy[index] = text;
+      return copy;
+    });
+  };
+
   const start = () => {
-    const players: LudoPlayerConfig[] = seats.map((seat, index) => ({
-      seat,
-      name: `Player ${index + 1}`,
-      civilizationId: `player-${index + 1}`,
-      civilizationName: `Player ${index + 1}`,
-      color: PLAYER_COLORS[seat] ?? PLAYER_COLORS[index % PLAYER_COLORS.length],
-    }));
+    const players: LudoPlayerConfig[] = seats.map((seat, index) => {
+      const rawName = playerNames[index]?.trim();
+      const name = rawName || `Player ${index + 1}`;
+      return {
+        seat,
+        name,
+        civilizationId: `player-${index + 1}`,
+        civilizationName: name,
+        color: PLAYER_COLORS[seat] ?? PLAYER_COLORS[index % PLAYER_COLORS.length],
+        isAi: false,
+      };
+    });
     setLudoSetup(players, effectiveYear);
     router.push('/game/ludo/play');
   };
@@ -61,22 +75,26 @@ export default function LudoSetupScreen() {
         ]}
         showsVerticalScrollIndicator={false}>
         <View style={styles.center}>
+          {/* Header */}
           <View style={styles.section}>
             <Button title="← BACK TO GAMES" size="sm" variant="text" onPress={() => router.back()} />
-            <ThemedText type="heroDisplay" style={styles.title}>
-              LUDO
+            <ThemedText type="heroDisplay" style={[styles.title, { color: theme.primary }]}>
+              CHAUPAR
+            </ThemedText>
+            <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '800' }}>
+              LOCAL 2–4 PLAYER PASS-AND-PLAY
             </ThemedText>
             <ThemedText type="editorialLead" themeColor="textSecondary">
-              Local pass-and-play. Captures pause for a Historical Duel on your selected year.
+              Roll the dice to determine questions; your correct answers determine your movement distance!
             </ThemedText>
           </View>
 
           <HairlineDivider verticalMargin="md" />
 
-          {/* PLAYERS */}
+          {/* PLAYER COUNT */}
           <View style={styles.section}>
-            <ThemedText type="sectionHeader">PLAYERS</ThemedText>
-            <View style={styles.row}>
+            <ThemedText type="sectionHeader" style={{ color: theme.primary }}>HOW MANY PLAYERS?</ThemedText>
+            <View style={styles.countRow}>
               {([2, 3, 4] as const).map((value) => (
                 <Pressable
                   key={value}
@@ -85,10 +103,14 @@ export default function LudoSetupScreen() {
                     styles.countChip,
                     {
                       backgroundColor: count === value ? theme.primaryLight : theme.card,
-                      borderColor: count === value ? theme.primary : theme.border,
+                      borderColor: count === value ? theme.primary : theme.cardBorder,
                     },
                   ]}>
-                  <ThemedText type="smallBold">{value}</ThemedText>
+                  <ThemedText
+                    type="smallBold"
+                    style={{ color: count === value ? theme.primary : theme.text }}>
+                    {value} PLAYERS
+                  </ThemedText>
                 </Pressable>
               ))}
             </View>
@@ -96,11 +118,43 @@ export default function LudoSetupScreen() {
 
           <HairlineDivider verticalMargin="md" />
 
-          {/* YEAR SELECTION (Replaces Empire Selection) */}
+          {/* PLAYER NAMES */}
           <View style={styles.section}>
-            <ThemedText type="sectionHeader">QUIZ YEAR</ThemedText>
+            <ThemedText type="sectionHeader" style={{ color: theme.primary }}>PLAYER NAMES</ThemedText>
             <ThemedText type="caption" themeColor="textSecondary">
-              Select or enter the specific year for all historical duels in this match.
+              Customize display names for each player sharing this device:
+            </ThemedText>
+
+            <View style={styles.namesList}>
+              {seats.map((seat, index) => {
+                const color = PLAYER_COLORS[seat] ?? PLAYER_COLORS[index % PLAYER_COLORS.length];
+                return (
+                  <View key={`name-row-${seat}`} style={[styles.nameRowItem, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                    <View style={[styles.colorDot, { backgroundColor: color }]} />
+                    <ThemedText type="smallBold" style={{ width: 70, color: theme.primary }}>
+                      Player {index + 1}:
+                    </ThemedText>
+                    <TextInput
+                      style={[styles.nameInput, { color: theme.text }]}
+                      value={playerNames[index] ?? `Player ${index + 1}`}
+                      onChangeText={(t) => handleNameChange(t, index)}
+                      placeholder={`Player ${index + 1}`}
+                      placeholderTextColor={theme.textMuted}
+                      maxLength={15}
+                    />
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+
+          <HairlineDivider verticalMargin="md" />
+
+          {/* QUIZ YEAR */}
+          <View style={styles.section}>
+            <ThemedText type="sectionHeader" style={{ color: theme.primary }}>HISTORICAL QUIZ YEAR</ThemedText>
+            <ThemedText type="caption" themeColor="textSecondary">
+              All question challenges during this match will test knowledge from this year:
             </ThemedText>
 
             <View style={styles.yearGrid}>
@@ -121,9 +175,15 @@ export default function LudoSetupScreen() {
                         borderColor: isSelected ? theme.primary : theme.cardBorder,
                       },
                     ]}>
-                    <ThemedText type="smallBold">{y}</ThemedText>
+                    <ThemedText
+                      type="smallBold"
+                      style={{ color: isSelected ? theme.primary : theme.text }}>
+                      {y}
+                    </ThemedText>
                     {supported ? (
-                      <ThemedText type="annotation" themeColor="textMuted">READY</ThemedText>
+                      <ThemedText type="annotation" style={{ color: isSelected ? theme.primary : theme.textMuted }}>
+                        VERIFIED
+                      </ThemedText>
                     ) : null}
                   </Pressable>
                 );
@@ -151,19 +211,23 @@ export default function LudoSetupScreen() {
             </View>
 
             <View style={[styles.activeYearBadge, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
-              <ThemedText type="smallBold">Active Quiz Year: {effectiveYear}</ThemedText>
+              <ThemedText type="smallBold" style={{ color: theme.primary }}>
+                Active Quiz Year: {effectiveYear}
+              </ThemedText>
               {!yearHasQuestions ? (
                 <AnnotationTag label="No verified questions yet" variant="accent" />
               ) : (
-                <AnnotationTag label="Verified questions available" variant="highlight" />
+                <AnnotationTag label="Ready for match" variant="highlight" />
               )}
             </View>
           </View>
 
+          {/* START BUTTON */}
           <View style={styles.section}>
             <Button
-              title="Start match"
+              title="START GAME →"
               size="lg"
+              variant="action"
               onPress={start}
               disabled={!yearHasQuestions}
             />
@@ -180,14 +244,34 @@ const styles = StyleSheet.create({
   center: { width: '100%', maxWidth: MaxContentWidth },
   section: { paddingHorizontal: Spacing.four, gap: Spacing.two, marginBottom: Spacing.three },
   title: { letterSpacing: -1 },
-  row: { flexDirection: 'row', gap: Spacing.two },
+  countRow: { flexDirection: 'row', gap: Spacing.two },
   countChip: {
-    width: 56,
-    height: 44,
+    flex: 1,
+    height: 48,
     borderRadius: BorderRadius.md,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  namesList: { gap: Spacing.two, marginTop: Spacing.one },
+  nameRowItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.three,
+    height: 48,
+    gap: Spacing.two,
+  },
+  colorDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+  },
+  nameInput: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
   },
   yearGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
   yearChip: {

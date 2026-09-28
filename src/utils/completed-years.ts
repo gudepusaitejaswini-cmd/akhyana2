@@ -25,7 +25,16 @@ export async function getCompletedYears(): Promise<number[]> {
     if (storage) {
       const stored = storage.getItem(STORAGE_KEY);
       if (stored) {
-        memoryCompletedYears = JSON.parse(stored);
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            memoryCompletedYears = parsed.filter((item): item is number => typeof item === 'number');
+          } else {
+            memoryCompletedYears = [];
+          }
+        } catch {
+          memoryCompletedYears = [];
+        }
       }
     }
   } catch (e) {

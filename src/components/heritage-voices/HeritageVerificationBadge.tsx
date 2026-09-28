@@ -16,7 +16,7 @@ export function HeritageVerificationBadge({ status, isDemo = false, showExplanat
     return (
       <View style={styles.container}>
         <View style={[styles.badge, { backgroundColor: colors.backgroundElement, borderColor: colors.cardBorder }]}>
-          <Text style={[styles.badgeText, { color: colors.oliveDark }]}>Demo Expert</Text>
+          <Text style={[styles.badgeText, { color: colors.primary }]}>Demo Expert</Text>
         </View>
         {showExplanation && (
           <Text style={[styles.explanation, { color: colors.textSecondary }]}>
@@ -31,7 +31,7 @@ export function HeritageVerificationBadge({ status, isDemo = false, showExplanat
     return (
       <View style={styles.container}>
         <View style={[styles.badge, { backgroundColor: colors.successLight, borderColor: colors.success }]}>
-          <Text style={[styles.badgeText, { color: colors.oliveDark }]}>✓ Expert Verified</Text>
+          <Text style={[styles.badgeText, { color: colors.success }]}>✓ Expert Verified</Text>
         </View>
         {showExplanation && (
           <Text style={[styles.explanation, { color: colors.textSecondary }]}>

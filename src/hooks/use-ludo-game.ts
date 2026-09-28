@@ -10,19 +10,30 @@ import { addCompletedYear } from '@/utils/completed-years';
 import {
   applyTokenMove,
   attachQuestion,
+  captureTarget,
   collectDiscovery,
   createLudoGame,
   currentPlayer,
   destinationDistance,
   DUEL_MS,
   evaluateDuelAnswers,
+  hasWon,
   legalTokenIds,
+  legalTokenIdsWithDistance,
+  nextSeat,
   resolveDuel,
-  rollDice,
   tokenById,
 } from '@/games/ludo/engine';
 import { getLudoYear } from '@/games/ludo/session';
-import { LudoGameState, LudoPlayerConfig, LudoDuelQuestion, LudoToken, QuizPhase } from '@/games/ludo/types';
+import {
+  LastTurnSummary,
+  LudoDuelQuestion,
+  LudoGameState,
+  LudoPlayerConfig,
+  LudoSeat,
+  LudoToken,
+  QuizPhase,
+} from '@/games/ludo/types';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const STEP_MS = 110;
@@ -32,9 +43,8 @@ function sleep(ms: number) {
 }
 
 /**
- * Map a canonical YearDuelQuestion to the duel-overlay presentation copy.
- * Choices are shuffled and correctIndex recalculated on every call. The
- * stored question is never mutated.
+ * Map a canonical YearDuelQuestion to the presentation copy.
+ * Choices are shuffled and correctIndex recalculated.
  */
 function toDuelPresentation(question: YearDuelQuestion): LudoDuelQuestion {
   const shuffled = shuffleYearQuestionChoices(question);
@@ -49,11 +59,47 @@ function toDuelPresentation(question: YearDuelQuestion): LudoDuelQuestion {
   };
 }
 
+/**
+ * Pick `count` distinct historical questions for a turn.
+ * Ensures no duplicates within the turn.
+ */
+function pickTurnQuestions(
+  year: number,
+  count: number,
+  usedIds: string[],
+): LudoDuelQuestion[] {
+  const allQuestions = getQuestionsForYear(year);
+  if (allQuestions.length === 0) return [];
+
+  let candidates = allQuestions.filter((q) => !usedIds.includes(q.id));
+  if (candidates.length < count) {
+    candidates = [...allQuestions];
+  }
+
+  const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+  const picked = shuffled.slice(0, count);
+
+  return picked.map((q) => toDuelPresentation(q));
+}
+
+export const QUESTIONS_PER_TURN = 6;
+
 export function useLudoGame(players: LudoPlayerConfig[]) {
   const [state, setState] = useState<LudoGameState>(() => createLudoGame(players));
   const [displayTokens, setDisplayTokens] = useState<LudoToken[]>(() => createLudoGame(players).tokens);
   const [busy, setBusy] = useState(false);
-  const [diceSpin, setDiceSpin] = useState<number | null>(null);
+
+  // Turn Quiz State (6 questions per turn)
+  const [turnQuestions, setTurnQuestions] = useState<LudoDuelQuestion[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
+  const [isAnswerSubmitted, setIsAnswerSubmitted] = useState(false);
+
+  // Turn Transition Summary
+  const [lastTurnSummary, setLastTurnSummary] = useState<LastTurnSummary | null>(null);
+
+  // Duel State
   const [duelChoices, setDuelChoices] = useState<{
     attacker: number | null;
     defender: number | null;
@@ -64,10 +110,18 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
   const [duelResult, setDuelResult] = useState<string | null>(null);
   const resolvedRef = useRef(false);
   const duelStartRef = useRef(0);
+  const finishTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  // ----- Year-based quiz cycle state (independent of board state) -----
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+    };
+  }, []);
+
+  // ----- Year-based quiz cycle state -----
   const [quizYear, setQuizYearState] = useState<number>(() => getLudoYear() ?? 1956);
   const [quizPhase, setQuizPhase] = useState<QuizPhase>('initial');
   const [usedQuestionIds, setUsedQuestionIds] = useState<string[]>([]);
@@ -85,7 +139,225 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
   const legalIds = useMemo(() => legalTokenIds(state), [state]);
   const player = currentPlayer(state);
 
-  // ----- Question selection: exact-year filter, phase-aware -----
+  // ----- 1. Start Player Turn (Pass -> Immediate 6-Question Quiz) -----
+  const startPlayerTurn = useCallback(() => {
+    setLastTurnSummary(null);
+    setDuelResult(null);
+    setSelectedChoice(null);
+    setIsAnswerSubmitted(false);
+
+    // Pick exactly 6 historical questions for this turn
+    const questions = pickTurnQuestions(quizYear, QUESTIONS_PER_TURN, usedRef.current);
+    const newUsed = [...usedRef.current, ...questions.map((q) => q.id)];
+    usedRef.current = newUsed;
+    setUsedQuestionIds(newUsed);
+
+    setTurnQuestions(questions);
+    setCurrentQuestionIndex(0);
+    setCorrectAnswersCount(0);
+
+    setState((cur) => ({
+      ...cur,
+      phase: 'turn_quiz',
+      earnedSteps: 0,
+      diceValue: null,
+      rawDiceRoll: null,
+      hasRolled: true,
+      turnQuestions: questions,
+      currentQuestionIndex: 0,
+      correctAnswersCount: 0,
+      pendingCapture: null,
+      pendingQuestion: null,
+    }));
+  }, [quizYear]);
+
+  // ----- 2. Select Choice for Current Question -----
+  const selectChoice = useCallback(
+    (choiceIndex: number) => {
+      if (isAnswerSubmitted) return;
+      setSelectedChoice(choiceIndex);
+    },
+    [isAnswerSubmitted],
+  );
+
+  // ----- 3. Submit Answer with Instant Verification & Feedback -----
+  const submitAnswer = useCallback(() => {
+    if (selectedChoice === null || isAnswerSubmitted) return;
+    const currentQ = turnQuestions[currentQuestionIndex];
+    if (!currentQ) return;
+
+    setIsAnswerSubmitted(true);
+    const isCorrect = selectedChoice === currentQ.correctIndex;
+    const nextCorrect = isCorrect ? correctAnswersCount + 1 : correctAnswersCount;
+    setCorrectAnswersCount(nextCorrect);
+
+    setState((cur) => ({
+      ...cur,
+      correctAnswersCount: nextCorrect,
+    }));
+  }, [selectedChoice, isAnswerSubmitted, turnQuestions, currentQuestionIndex, correctAnswersCount]);
+
+  // ----- 4. Next Question / Complete Round after 6 Questions -----
+  const nextQuestion = useCallback(() => {
+    if (!isAnswerSubmitted) return;
+
+    if (currentQuestionIndex + 1 < turnQuestions.length) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+      setSelectedChoice(null);
+      setIsAnswerSubmitted(false);
+      setState((cur) => ({
+        ...cur,
+        currentQuestionIndex: cur.currentQuestionIndex + 1,
+      }));
+    } else {
+      // Completed all 6 questions -> Move to round summary
+      const finalSteps = correctAnswersCount;
+      setSelectedChoice(null);
+      setIsAnswerSubmitted(false);
+      setState((cur) => ({
+        ...cur,
+        phase: 'quiz_summary',
+        earnedSteps: finalSteps,
+        diceValue: finalSteps,
+      }));
+    }
+  }, [isAnswerSubmitted, currentQuestionIndex, turnQuestions.length, correctAnswersCount]);
+
+  // ----- 5. Pass Turn to Next Player -----
+  const passTurn = useCallback((spacesMoved: number = 0) => {
+    const cur = stateRef.current;
+    const curPlayer = currentPlayer(cur);
+    const next = nextSeat(cur, curPlayer.seat);
+    const nextPlayer = cur.players.find((p) => p.seat === next) ?? cur.players[0];
+
+    const summary: LastTurnSummary = {
+      playerSeat: curPlayer.seat,
+      playerName: curPlayer.name,
+      playerColor: curPlayer.color,
+      correctCount: cur.correctAnswersCount,
+      totalQuestions: cur.turnQuestions.length || QUESTIONS_PER_TURN,
+      spacesMoved,
+      nextSeat: next,
+      nextPlayerName: nextPlayer.name,
+      nextPlayerColor: nextPlayer.color,
+    };
+
+    setLastTurnSummary(summary);
+    setSelectedChoice(null);
+    setIsAnswerSubmitted(false);
+    setTurnQuestions([]);
+    setCurrentQuestionIndex(0);
+    setCorrectAnswersCount(0);
+
+    setState((prev) => ({
+      ...prev,
+      currentSeat: next,
+      phase: 'pass_turn',
+      earnedSteps: 0,
+      diceValue: null,
+      rawDiceRoll: null,
+      turnQuestions: [],
+      currentQuestionIndex: 0,
+      correctAnswersCount: 0,
+      hasRolled: false,
+      pendingCapture: null,
+      pendingQuestion: null,
+      lastTurnSummary: summary,
+      turnNonce: prev.turnNonce + 1,
+    }));
+  }, []);
+
+  // ----- 6. Proceed from Summary to Move Token -----
+  const proceedToMove = useCallback(() => {
+    const cur = stateRef.current;
+    const steps = cur.correctAnswersCount;
+    const legals = legalTokenIdsWithDistance(cur, steps);
+
+    if (steps > 0 && legals.length > 0) {
+      setState((prev) => ({
+        ...prev,
+        phase: 'selecting',
+        earnedSteps: steps,
+        diceValue: steps,
+      }));
+    } else {
+      // 0 correct or no legal moves: pass turn directly
+      passTurn(0);
+    }
+  }, [passTurn]);
+
+  // ----- 7. Token Movement Animation & Duel Check -----
+  const moveToken = useCallback(
+    async (tokenId: string) => {
+      const current = stateRef.current;
+      const steps = current.earnedSteps || current.diceValue || 0;
+      if (busy || current.phase !== 'selecting' || steps <= 0) return;
+      if (!legalTokenIds(current).includes(tokenId)) return;
+      const token = tokenById(current, tokenId);
+      if (!token) return;
+      const nextDistance = destinationDistance(token, steps);
+      if (nextDistance === null) return;
+
+      setBusy(true);
+      if (token.distance < 0) {
+        setDisplayTokens((tokens) =>
+          tokens.map((item) => (item.id === tokenId ? { ...item, distance: 0 } : item)),
+        );
+        await sleep(STEP_MS * 2);
+        for (let distance = 1; distance <= nextDistance; distance += 1) {
+          setDisplayTokens((tokens) =>
+            tokens.map((item) => (item.id === tokenId ? { ...item, distance } : item)),
+          );
+          await sleep(STEP_MS);
+        }
+      } else {
+        for (let distance = token.distance + 1; distance <= nextDistance; distance += 1) {
+          setDisplayTokens((tokens) =>
+            tokens.map((item) => (item.id === tokenId ? { ...item, distance } : item)),
+          );
+          await sleep(STEP_MS);
+        }
+      }
+
+      const moved = applyTokenMove(current, tokenId, LUDO_DISCOVERIES);
+      setDisplayTokens(moved.tokens);
+      setBusy(false);
+
+      if (moved.phase === 'duel') {
+        setState(moved);
+      } else if (hasWon(moved, current.currentSeat)) {
+        setState({
+          ...moved,
+          phase: 'complete',
+          winnerSeat: current.currentSeat,
+        });
+      } else {
+        // Normal move completed: attach summary and pass to next player
+        const curPlayer = currentPlayer(current);
+        const next = moved.currentSeat;
+        const nextPlayer = current.players.find((p) => p.seat === next) ?? current.players[0];
+        const summary: LastTurnSummary = {
+          playerSeat: curPlayer.seat,
+          playerName: curPlayer.name,
+          playerColor: curPlayer.color,
+          correctCount: current.correctAnswersCount,
+          totalQuestions: current.turnQuestions.length || QUESTIONS_PER_TURN,
+          spacesMoved: steps,
+          nextSeat: next,
+          nextPlayerName: nextPlayer.name,
+          nextPlayerColor: nextPlayer.color,
+        };
+        setLastTurnSummary(summary);
+        setState({
+          ...moved,
+          lastTurnSummary: summary,
+        });
+      }
+    },
+    [busy],
+  );
+
+  // ----- 8. Historical Duel Question Setup & Timer -----
   useEffect(() => {
     if (state.phase !== 'duel' || !state.pendingCapture) return;
     resolvedRef.current = false;
@@ -102,9 +374,8 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
       } else {
         canonical = pickYearDuelQuestion(year, usedRef.current);
       }
-      if (!canonical) return current; // handled by fallback resolution
+      if (!canonical) return current;
       presentedRef.current = canonical;
-      // Record as presented: no repeats within the same initial pass.
       if (!usedRef.current.includes(canonical.id)) {
         usedRef.current = [...usedRef.current, canonical.id];
         setUsedQuestionIds(usedRef.current);
@@ -121,132 +392,57 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
     return () => clearInterval(timer);
   }, [state.phase, state.pendingQuestion]);
 
+  // ----- 9. Duel Answer & Resolution -----
   const finishDuel = useCallback((outcome: 'attacker' | 'defender' | 'none') => {
     if (resolvedRef.current) return;
     resolvedRef.current = true;
     setDuelResult(
-      outcome === 'attacker' ? 'Attack holds. Capture proceeds.' : outcome === 'defender' ? 'Defence holds. No capture.' : 'Time. Neither capture nor defence.',
+      outcome === 'attacker'
+        ? '✓ Correct! Attack holds. Capture successful.'
+        : outcome === 'defender'
+        ? '✕ Incorrect. Defence holds. Opponent survives.'
+        : '⏱ Time expired! Opponent holds position.',
     );
 
-    // ----- Quiz cycle bookkeeping (attacker is the duel initiator) -----
-    const canonical = presentedRef.current;
-    const attackerCorrect = outcome === 'attacker';
-    if (canonical) {
-      const phase = quizPhaseRef.current;
-      if (phase === 'initial' && !attackerCorrect) {
-        incorrectRef.current = [...incorrectRef.current, canonical.id];
-        setIncorrectQuestionIds(incorrectRef.current);
-      } else if (phase === 'retry' && attackerCorrect) {
-        incorrectRef.current = incorrectRef.current.filter((id) => id !== canonical.id);
-        setIncorrectQuestionIds(incorrectRef.current);
-      }
-      // retry-phase incorrect answers keep the ID in incorrectQuestionIds.
-    }
-
-    setTimeout(() => {
-      setState((current) => {
-        const next = resolveDuel(current, outcome, LUDO_DISCOVERIES);
-        setDisplayTokens(next.tokens);
-        return next;
-      });
-      setDuelResult(null);
-
-      // ----- Phase transitions after the duel resolves -----
-      const year = quizYear;
-      const total = getQuestionsForYear(year).length;
-      if (total > 0 && usedRef.current.length >= total) {
-        if (quizPhaseRef.current === 'initial') {
-          if (incorrectRef.current.length > 0) {
-            setQuizPhaseSafe('retry');
-          } else {
-            setQuizPhaseSafe('year_complete');
-            void addCompletedYear(year);
-          }
-        } else if (quizPhaseRef.current === 'retry' && incorrectRef.current.length === 0) {
-          setQuizPhaseSafe('year_complete');
-          void addCompletedYear(year);
-        }
-      }
-      presentedRef.current = null;
-    }, 700);
-  }, [quizYear]);
-
-  useEffect(() => {
-    if (state.phase !== 'duel' || !state.pendingQuestion || resolvedRef.current) return;
-    if (!state.pendingCapture) {
-      // No question available for this year: resolve as time-out so the
-      // duel never hangs. Defender holds, capture does not proceed.
-      finishDuel('none');
-      return;
-    }
-    const outcome = evaluateDuelAnswers({
-      correctIndex: state.pendingQuestion.correctIndex,
-      attackerChoice: duelChoices.attacker,
-      defenderChoice: duelChoices.defender,
-      attackerAtMs: duelChoices.attackerAt,
-      defenderAtMs: duelChoices.defenderAt,
-      elapsedMs: duelElapsed,
-    });
-    if (outcome !== 'pending') finishDuel(outcome);
-  }, [duelChoices, duelElapsed, finishDuel, state.pendingQuestion, state.phase]);
-
-  const roll = useCallback(async (forcedValue?: number) => {
-    if (busy || stateRef.current.phase !== 'rolling' || stateRef.current.hasRolled) return;
-    setBusy(true);
-
-    let value = forcedValue;
-
-    // Only spin if we don't have a forced value from Rapid Fire
-    if (value === undefined) {
-      for (let i = 0; i < 8; i += 1) {
-        setDiceSpin(1 + Math.floor(Math.random() * 6));
-        await sleep(45);
-      }
-      value = 1 + Math.floor(Math.random() * 6);
-    }
-
-    setDiceSpin(null);
-    setState((current) => {
-      const next = rollDice(current, value as number);
+    if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
+    finishTimerRef.current = setTimeout(() => {
+      const activeSeat = stateRef.current.currentSeat;
+      const cur = stateRef.current;
+      const next = resolveDuel(cur, outcome, LUDO_DISCOVERIES);
       setDisplayTokens(next.tokens);
-      return next;
-    });
-    setBusy(false);
-  }, [busy]);
 
-  const moveToken = useCallback(
-    async (tokenId: string) => {
-      const current = stateRef.current;
-      if (busy || current.phase !== 'selecting' || !legalTokenIds(current).includes(tokenId)) return;
-      const token = tokenById(current, tokenId);
-      if (!token || current.diceValue === null) return;
-      const nextDistance = destinationDistance(token, current.diceValue);
-      if (nextDistance === null) return;
-
-      setBusy(true);
-      if (token.distance < 0) {
-        setDisplayTokens((tokens) =>
-          tokens.map((item) => (item.id === tokenId ? { ...item, distance: 0 } : item)),
-        );
-        await sleep(STEP_MS * 2);
-      } else {
-        for (let distance = token.distance + 1; distance <= nextDistance; distance += 1) {
-          setDisplayTokens((tokens) =>
-            tokens.map((item) => (item.id === tokenId ? { ...item, distance } : item)),
-          );
-          await sleep(STEP_MS);
-        }
+      if (hasWon(next, activeSeat)) {
+        setState({
+          ...next,
+          phase: 'complete',
+          winnerSeat: activeSeat,
+        });
+        return;
       }
 
-      setState((latest) => {
-        const next = applyTokenMove(latest, tokenId, LUDO_DISCOVERIES);
-        setDisplayTokens(next.tokens);
-        return next;
+      const attackerPlayer = cur.players.find((p) => p.seat === activeSeat) ?? cur.players[0];
+      const nextPlayer = cur.players.find((p) => p.seat === next.currentSeat) ?? cur.players[0];
+      const summary: LastTurnSummary = {
+        playerSeat: attackerPlayer.seat,
+        playerName: attackerPlayer.name,
+        playerColor: attackerPlayer.color,
+        correctCount: cur.correctAnswersCount,
+        totalQuestions: cur.turnQuestions.length || QUESTIONS_PER_TURN,
+        spacesMoved: cur.earnedSteps || cur.diceValue || 0,
+        nextSeat: next.currentSeat,
+        nextPlayerName: nextPlayer.name,
+        nextPlayerColor: nextPlayer.color,
+      };
+      setLastTurnSummary(summary);
+      setState({
+        ...next,
+        lastTurnSummary: summary,
       });
-      setBusy(false);
-    },
-    [busy],
-  );
+
+      setDuelResult(null);
+      presentedRef.current = null;
+    }, 1200);
+  }, []);
 
   const answerDuel = useCallback((role: 'attacker' | 'defender', choice: number) => {
     if (stateRef.current.phase !== 'duel' || resolvedRef.current) return;
@@ -261,6 +457,23 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
     });
   }, []);
 
+  useEffect(() => {
+    if (state.phase !== 'duel' || !state.pendingQuestion || resolvedRef.current) return;
+    if (!state.pendingCapture) {
+      finishDuel('none');
+      return;
+    }
+    const outcome = evaluateDuelAnswers({
+      correctIndex: state.pendingQuestion.correctIndex,
+      attackerChoice: duelChoices.attacker,
+      defenderChoice: duelChoices.defender,
+      attackerAtMs: duelChoices.attackerAt,
+      defenderAtMs: duelChoices.defenderAt,
+      elapsedMs: duelElapsed,
+    });
+    if (outcome !== 'pending') finishDuel(outcome);
+  }, [duelChoices, duelElapsed, finishDuel, state.pendingQuestion, state.phase]);
+
   const continueDiscovery = useCallback(() => {
     setState((current) => {
       const next = collectDiscovery(current, LUDO_DISCOVERIES);
@@ -269,11 +482,6 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
     });
   }, []);
 
-  /**
-   * Start a fresh quiz cycle for a new year inside the same match.
-   * Only quiz-year state resets; the board, tokens, XP and turn order
-   * are untouched.
-   */
   const selectNextYear = useCallback((year: number) => {
     setQuizYearState(year);
     setQuizPhaseSafe('initial');
@@ -289,7 +497,12 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
     setState(next);
     setDisplayTokens(next.tokens);
     setBusy(false);
-    setDiceSpin(null);
+    setSelectedChoice(null);
+    setIsAnswerSubmitted(false);
+    setLastTurnSummary(null);
+    setTurnQuestions([]);
+    setCurrentQuestionIndex(0);
+    setCorrectAnswersCount(0);
     setDuelResult(null);
     usedRef.current = [];
     incorrectRef.current = [];
@@ -307,16 +520,27 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
     player,
     legalIds,
     busy,
-    diceSpin,
+    questionsPerTurn: QUESTIONS_PER_TURN,
+    turnQuestions,
+    currentQuestionIndex,
+    correctAnswersCount,
+    selectedChoice,
+    isAnswerSubmitted,
+    lastTurnSummary,
     duelChoices,
     duelElapsed,
     duelResult,
-    roll,
+    startPlayerTurn,
+    selectChoice,
+    submitAnswer,
+    nextQuestion,
+    proceedToMove,
+    passTurn,
     moveToken,
     answerDuel,
     continueDiscovery,
     reset,
-    // year-based quiz cycle
+    // Year-based quiz cycle
     quizYear,
     quizPhase,
     usedQuestionIds,

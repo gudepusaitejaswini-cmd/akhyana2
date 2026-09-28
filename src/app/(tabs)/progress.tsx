@@ -74,8 +74,8 @@ export default function ProgressScreen() {
           <AkhyanaHeader showTagline={false} />
 
           <View style={styles.titleSection}>
-            <ThemedText type="heroDisplay" style={styles.pageTitle}>
-                            {"YOUR\nMASTERY."}
+            <ThemedText type="heroDisplay" style={[styles.pageTitle, { color: theme.primary }]}>
+              YOUR{'\n'}MASTERY.
             </ThemedText>
             <ThemedText type="editorialLead" themeColor="textSecondary" style={styles.pageLead}>
               Play games, discover history, and build your knowledge profile.
@@ -86,29 +86,34 @@ export default function ProgressScreen() {
 
           {/* YOUR PROGRESS */}
           <View style={styles.section}>
-            <ThemedText type="sectionHeader" themeColor="text">
+            <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
               YOUR PROGRESS
             </ThemedText>
 
             <View style={styles.statHeroBox}>
-              <ThemedText type="annotation" themeColor="textMuted">
-                LIFETIME KNOWLEDGE
+              <ThemedText type="annotation" style={{ color: theme.accent, fontWeight: '800' }}>
+                LIFETIME KNOWLEDGE EARNED
               </ThemedText>
-              <ThemedText type="heroDisplay" style={[styles.largeMasteryNumber, { color: theme.oliveDeep }]}>
-                {data.overall.xp} <ThemedText type="editorialLead" style={{ color: theme.oliveMedium }}>XP</ThemedText>
+              <ThemedText type="heroDisplay" style={[styles.largeMasteryNumber, { color: theme.primary }]}>
+                {data.overall.xp}{' '}
+                <ThemedText type="editorialLead" style={{ color: theme.accent, fontWeight: '900', fontSize: 28 }}>
+                  XP
+                </ThemedText>
               </ThemedText>
             </View>
 
             <View style={styles.xpSection}>
               <View style={styles.xpHeaderRow}>
-                <ThemedText type="smallBold">LEVEL {data.overall.level}</ThemedText>
+                <ThemedText type="smallBold" style={{ color: theme.primary }}>
+                  LEVEL {data.overall.level}
+                </ThemedText>
                 <ThemedText type="caption" themeColor="textMuted">
                   {data.overall.xp} / {data.overall.nextLevelXp} XP TO LEVEL {data.overall.level + 1}
                 </ThemedText>
               </View>
               <ProgressBar
                 progress={Math.round((data.overall.xp / data.overall.nextLevelXp) * 100)}
-                colorVariant="primary"
+                colorVariant="accent"
                 height={8}
               />
             </View>
@@ -118,7 +123,7 @@ export default function ProgressScreen() {
 
           {/* GAME PROGRESS */}
           <View style={styles.section}>
-            <ThemedText type="sectionHeader" themeColor="text">
+            <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
               GAME PROGRESS
             </ThemedText>
 
@@ -126,43 +131,47 @@ export default function ProgressScreen() {
               {/* ChronoSearch */}
               <View style={[styles.gameCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
                 <View style={styles.gameCardTop}>
-                  <ThemedText type="cardTitle" style={{ fontSize: 18 }}>ChronoSearch</ThemedText>
-                  <AnnotationTag label={`${data.games.chronosearch.completionPercent}%`} variant="highlight" />
+                  <ThemedText type="cardTitle" style={{ fontSize: 18, color: theme.primary }}>
+                    ChronoSearch
+                  </ThemedText>
+                  <AnnotationTag label={`${data.games.chronosearch.completionPercent}%`} variant="discovery" />
                 </View>
                 <View style={styles.gameStatsRow}>
                   <View style={styles.gameStatCol}>
                     <ThemedText type="caption" themeColor="textMuted">WORDS DISCOVERED</ThemedText>
-                    <ThemedText type="smallBold">{data.games.chronosearch.wordsDiscovered}</ThemedText>
+                    <ThemedText type="smallBold" style={{ color: theme.text }}>{data.games.chronosearch.wordsDiscovered}</ThemedText>
                   </View>
                   <View style={styles.gameStatCol}>
                     <ThemedText type="caption" themeColor="textMuted">XP EARNED</ThemedText>
-                    <ThemedText type="smallBold">{data.games.chronosearch.xpEarned}</ThemedText>
+                    <ThemedText type="smallBold" style={{ color: theme.accent }}>+{data.games.chronosearch.xpEarned} XP</ThemedText>
                   </View>
                 </View>
-                <ProgressBar progress={data.games.chronosearch.completionPercent} colorVariant="primary" height={4} />
+                <ProgressBar progress={data.games.chronosearch.completionPercent} colorVariant="discovery" height={5} />
               </View>
 
               {/* Ludo */}
               <View style={[styles.gameCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
                 <View style={styles.gameCardTop}>
-                  <ThemedText type="cardTitle" style={{ fontSize: 18 }}>Ludo: Legends of Civilization</ThemedText>
-                  <AnnotationTag label={`${data.games.ludo.completionPercent}%`} variant="highlight" />
+                  <ThemedText type="cardTitle" style={{ fontSize: 18, color: theme.primary }}>
+                    Ludo: Legends of Civilization
+                  </ThemedText>
+                  <AnnotationTag label={`${data.games.ludo.completionPercent}%`} variant="action" />
                 </View>
                 <View style={styles.gameStatsRow}>
                   <View style={styles.gameStatCol}>
                     <ThemedText type="caption" themeColor="textMuted">MATCHES PLAYED</ThemedText>
-                    <ThemedText type="smallBold">{data.games.ludo.matchesPlayed}</ThemedText>
+                    <ThemedText type="smallBold" style={{ color: theme.text }}>{data.games.ludo.matchesPlayed}</ThemedText>
                   </View>
                   <View style={styles.gameStatCol}>
                     <ThemedText type="caption" themeColor="textMuted">DUELS WON</ThemedText>
-                    <ThemedText type="smallBold">{data.games.ludo.duelsCompleted}</ThemedText>
+                    <ThemedText type="smallBold" style={{ color: theme.text }}>{data.games.ludo.duelsCompleted}</ThemedText>
                   </View>
                   <View style={styles.gameStatCol}>
                     <ThemedText type="caption" themeColor="textMuted">XP EARNED</ThemedText>
-                    <ThemedText type="smallBold">{data.games.ludo.xpEarned}</ThemedText>
+                    <ThemedText type="smallBold" style={{ color: theme.accent }}>+{data.games.ludo.xpEarned} XP</ThemedText>
                   </View>
                 </View>
-                <ProgressBar progress={data.games.ludo.completionPercent} colorVariant="primary" height={4} />
+                <ProgressBar progress={data.games.ludo.completionPercent} colorVariant="secondary" height={5} />
               </View>
             </View>
           </View>
@@ -172,7 +181,7 @@ export default function ProgressScreen() {
           {/* TOPIC MASTERY */}
           <View style={styles.section}>
             <View style={styles.flexBetween}>
-              <ThemedText type="sectionHeader" themeColor="text">
+              <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
                 TOPIC MASTERY
               </ThemedText>
             </View>
@@ -184,21 +193,21 @@ export default function ProgressScreen() {
               {data.topics.map((topic) => (
                 <View
                   key={topic.id}
-                  style={[styles.topicRow, { borderBottomColor: theme.border }]}>
+                  style={[styles.topicRow, { borderBottomColor: theme.cardBorder }]}>
                   <View style={styles.topicMainCol}>
                     <View style={styles.topicTitleLine}>
-                      <ThemedText type="cardTitle" style={styles.topicNameText}>
+                      <ThemedText type="cardTitle" style={[styles.topicNameText, { color: theme.primary }]}>
                         {topic.name}
                       </ThemedText>
-                      <ThemedText type="editorialHeader" style={[styles.topicPercentText, { color: theme.olive }]}>
+                      <ThemedText type="editorialHeader" style={[styles.topicPercentText, { color: theme.accent, fontWeight: '800' }]}>
                         {topic.masteryScore}%
                       </ThemedText>
                     </View>
                     <View style={styles.topicBarWrapper}>
                       <ProgressBar
                         progress={topic.masteryScore}
-                        colorVariant="primary"
-                        height={4}
+                        colorVariant="accent"
+                        height={5}
                       />
                     </View>
                   </View>
@@ -211,8 +220,8 @@ export default function ProgressScreen() {
 
           {/* BADGES EARNED */}
           <View style={styles.section}>
-            <ThemedText type="sectionHeader" themeColor="text">
-              BADGES EARNED
+            <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
+              BADGES & MILESTONES
             </ThemedText>
             
             <View style={styles.badgesList}>
@@ -222,23 +231,23 @@ export default function ProgressScreen() {
                   key={`year-badge-${year}`}
                   style={[
                     styles.badgeRowItem,
-                    { borderBottomColor: theme.border },
+                    { borderBottomColor: theme.cardBorder },
                   ]}>
-                  <View style={[styles.badgeIconBox, { backgroundColor: theme.primaryLight }]}>
-                    <ThemedText type="smallBold" style={{ color: theme.primary }}>
+                  <View style={[styles.badgeIconBox, { backgroundColor: theme.accentLight }]}>
+                    <ThemedText type="smallBold" style={{ color: theme.accentText }}>
                       YEAR
                     </ThemedText>
                   </View>
 
                   <View style={styles.badgeContentCol}>
-                    <ThemedText type="cardTitle" style={{ fontSize: 18 }}>
+                    <ThemedText type="cardTitle" style={{ fontSize: 18, color: theme.primary }}>
                       {year}
                     </ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
                       Completed Year · Mastered in Ludo Historical Duels
                     </ThemedText>
                   </View>
-                  <AnnotationTag label="COMPLETED" variant="highlight" />
+                  <AnnotationTag label="MASTERED" variant="accent" />
                 </View>
               ))}
 
@@ -247,22 +256,23 @@ export default function ProgressScreen() {
                   key={badge.id}
                   style={[
                     styles.badgeRowItem,
-                    { borderBottomColor: theme.border },
+                    { borderBottomColor: theme.cardBorder },
                   ]}>
-                  <View style={[styles.badgeIconBox, { backgroundColor: theme.backgroundElement }]}>
-                    <ThemedText type="smallBold" style={{ color: theme.oliveDark }}>
+                  <View style={[styles.badgeIconBox, { backgroundColor: theme.primaryLight }]}>
+                    <ThemedText type="smallBold" style={{ color: theme.primary }}>
                       {badge.icon}
                     </ThemedText>
                   </View>
 
                   <View style={styles.badgeContentCol}>
-                    <ThemedText type="cardTitle" style={{ fontSize: 18 }}>
+                    <ThemedText type="cardTitle" style={{ fontSize: 18, color: theme.primary }}>
                       {badge.name}
                     </ThemedText>
                     <ThemedText type="small" themeColor="textSecondary">
                       {badge.desc}
                     </ThemedText>
                   </View>
+                  <AnnotationTag label="EARNED" variant="highlight" />
                 </View>
               ))}
             </View>

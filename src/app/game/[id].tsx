@@ -40,7 +40,7 @@ export default function GameDetailScreen() {
         <View style={styles.centerWrapper}>
           <View style={styles.topNavRow}>
             <Button title="← BACK TO GAMES" size="sm" variant="text" onPress={() => router.back()} />
-            <AnnotationTag label={game.categoryLabel.toUpperCase()} variant="highlight" />
+            <AnnotationTag label={game.categoryLabel.toUpperCase()} variant="action" />
           </View>
 
           <View style={styles.heroSection}>
@@ -83,11 +83,11 @@ export default function GameDetailScreen() {
             <View
               style={[
                 styles.comingSoonBox,
-                { backgroundColor: theme.backgroundElement, borderLeftColor: theme.accent },
+                { backgroundColor: theme.card, borderColor: theme.cardBorder, borderWidth: 1, borderLeftColor: theme.secondary, borderLeftWidth: 4 },
               ]}>
               <AnnotationTag
                 label={game.isLocked ? 'COMING SOON' : 'AVAILABLE'}
-                variant={game.isLocked ? 'accent' : 'highlight'}
+                variant={game.isLocked ? 'accent' : 'action'}
               />
               <ThemedText type="editorialHeader">
                 {game.isLocked ? 'Gameplay is next' : game.name}
@@ -96,10 +96,10 @@ export default function GameDetailScreen() {
                 {game.gameplayPreview}
               </ThemedText>
               {game.id === 'chronosearch' ? (
-                <Button title="Begin hunt →" onPress={() => router.push('/game/chronosearch')} />
+                <Button title="Begin hunt →" variant="action" onPress={() => router.push('/game/chronosearch')} />
               ) : null}
               {game.id === 'ludo-legends' ? (
-                <Button title="Begin match →" onPress={() => router.push('/game/ludo')} />
+                <Button title="Begin match →" variant="action" onPress={() => router.push('/game/ludo')} />
               ) : null}
             </View>
           </View>

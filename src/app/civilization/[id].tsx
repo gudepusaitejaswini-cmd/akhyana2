@@ -53,7 +53,7 @@ export default function CivilizationDetailScreen() {
 
           {/* Hero Section */}
           <View style={styles.heroSection}>
-            <AnnotationTag label={civilization.period.toUpperCase()} variant="highlight" />
+            <AnnotationTag label={civilization.period.toUpperCase()} variant="discovery" />
 
             <ThemedText type="heroDisplay" style={styles.title}>
               {civilization.name}
@@ -71,7 +71,7 @@ export default function CivilizationDetailScreen() {
               <Button
                 title="START LEARNING →"
                 size="lg"
-                variant="primary"
+                variant="action"
                 onPress={() => {
                   setActiveCivilizationId(civilization.id);
                   router.push('/');
@@ -109,16 +109,16 @@ export default function CivilizationDetailScreen() {
                       { borderBottomColor: theme.border },
                       pressed && styles.pressed,
                     ]}>
-                    <ThemedText type="annotation" style={{ color: theme.accent }}>
+                    <ThemedText type="annotation" style={{ color: theme.discovery }}>
                       0{topic.chronologicalPosition}
                     </ThemedText>
 
                     <View style={styles.topicMainCol}>
                       <View style={styles.topicHeaderLine}>
-                        <ThemedText type="cardTitle" style={styles.topicTitle}>
+                        <ThemedText type="cardTitle" style={[styles.topicTitle, { color: theme.primary }]}>
                           {topic.title}
                         </ThemedText>
-                        <ThemedText type="annotation" style={{ color: theme.primary }}>
+                        <ThemedText type="annotation" style={{ color: theme.accent }}>
                           {topic.masteryPercent}%
                         </ThemedText>
                       </View>
@@ -147,13 +147,13 @@ export default function CivilizationDetailScreen() {
 
             <View style={styles.sourcesList}>
               {civilization.sources.map((src, idx) => (
-                <View key={idx} style={[styles.sourceItemRow, { borderBottomColor: theme.border }]}>
-                  <ThemedText type="smallBold">{src.title}</ThemedText>
+                <View key={idx} style={[styles.sourceItemRow, { backgroundColor: theme.card, borderColor: theme.cardBorder, borderWidth: 1, borderRadius: BorderRadius.md, padding: Spacing.three, marginVertical: 4 }]}>
+                  <ThemedText type="smallBold" style={{ color: theme.primary }}>{src.title}</ThemedText>
                   <ThemedText type="caption" themeColor="textSecondary">
                     {src.authorOrInstitution} • {src.yearOrPeriod || 'Excavation Record'}
                   </ThemedText>
                   {src.notes && (
-                    <ThemedText type="caption" themeColor="textMuted" style={{ fontStyle: 'italic' }}>
+                    <ThemedText type="caption" style={{ color: theme.discovery, fontStyle: 'italic', marginTop: 2 }}>
                       &ldquo;{src.notes}&rdquo;
                     </ThemedText>
                   )}

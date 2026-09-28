@@ -67,14 +67,14 @@ export function HeritageReportModal({ visible, articleId, onClose }: Props) {
                     style={[
                       styles.reasonRow,
                       { borderColor: colors.cardBorder },
-                      selectedReason === r.value && { backgroundColor: colors.sageLight, borderColor: colors.olive },
+                      selectedReason === r.value && { backgroundColor: colors.primaryLight, borderColor: colors.primary },
                     ]}
                     onPress={() => setSelectedReason(r.value)}>
                     <Text
                       style={[
                         styles.reasonText,
                         { color: colors.text },
-                        selectedReason === r.value && { fontWeight: '700', color: colors.oliveDeep },
+                        selectedReason === r.value && { fontWeight: '700', color: colors.primary },
                       ]}>
                       {r.label}
                     </Text>

@@ -35,35 +35,48 @@ export function LudoDuelOverlay({
   return (
     <View style={styles.overlay}>
       <ScrollView contentContainerStyle={styles.overlayInner} bounces={false}>
-      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
-        <AnnotationTag label="Historical duel · 5 seconds" variant="accent" />
+      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.accent }]}>
+        <View style={styles.headerRow}>
+          <AnnotationTag label="HISTORICAL DUEL · 5 SECONDS" variant="action" />
+          <ThemedText type="annotation" style={{ color: theme.accent, fontWeight: '800' }}>
+            HISTORICAL ENCOUNTER
+          </ThemedText>
+        </View>
+
         <View style={styles.vsRow}>
           <View style={styles.side}>
             <View style={[styles.dot, { backgroundColor: attacker.color }]} />
-            <ThemedText type="smallBold">{attacker.name}</ThemedText>
-            <ThemedText type="caption" themeColor="textMuted">
+            <ThemedText type="smallBold" style={{ color: theme.primary }}>{attacker.name}</ThemedText>
+            <ThemedText type="caption" style={{ color: theme.secondary, fontWeight: '800' }}>
               ATTACK
             </ThemedText>
           </View>
-          <ThemedText type="annotation">VS</ThemedText>
+          <View style={[styles.vsBadge, { backgroundColor: theme.primaryLight }]}>
+            <ThemedText type="annotation" style={{ color: theme.primary, fontWeight: '900' }}>VS</ThemedText>
+          </View>
           <View style={styles.side}>
             <View style={[styles.dot, { backgroundColor: defender.color }]} />
-            <ThemedText type="smallBold">{defender.name}</ThemedText>
-            <ThemedText type="caption" themeColor="textMuted">
+            <ThemedText type="smallBold" style={{ color: theme.primary }}>{defender.name}</ThemedText>
+            <ThemedText type="caption" style={{ color: theme.discovery, fontWeight: '800' }}>
               DEFEND
             </ThemedText>
           </View>
         </View>
-        <ThemedText type="heroDisplay" style={styles.count}>
+
+        <ThemedText type="heroDisplay" style={[styles.count, { color: theme.secondary }]}>
           {remaining}
         </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
+
+        <ThemedText type="cardTitle" style={[styles.questionText, { color: theme.text }]}>
           {question.question}
         </ThemedText>
+
         {result ? (
-          <ThemedText type="smallBold" style={{ color: theme.primary }}>
-            {result}
-          </ThemedText>
+          <View style={[styles.resultBox, { backgroundColor: theme.primaryLight, borderColor: theme.primary }]}>
+            <ThemedText type="smallBold" style={{ color: theme.primary, textAlign: 'center' }}>
+              {result}
+            </ThemedText>
+          </View>
         ) : (
           <View style={styles.columns}>
             <AnswerColumn
@@ -104,7 +117,7 @@ function AnswerColumn({
   const theme = useTheme();
   return (
     <View style={styles.column}>
-      <ThemedText type="annotation" themeColor="textMuted">
+      <ThemedText type="annotation" style={{ color: theme.textSecondary, fontWeight: '700' }}>
         {label}
       </ThemedText>
       {choices.map((choice, index) => {
@@ -117,11 +130,18 @@ function AnswerColumn({
             style={[
               styles.choice,
               {
-                backgroundColor: isSelected ? theme.primaryLight : theme.background,
+                backgroundColor: isSelected ? theme.primaryLight : theme.backgroundElement,
                 borderColor: isSelected ? theme.primary : theme.border,
               },
             ]}>
-            <ThemedText type="caption">{choice}</ThemedText>
+            <ThemedText
+              type="caption"
+              style={{
+                color: isSelected ? theme.primary : theme.text,
+                fontWeight: isSelected ? '700' : '400',
+              }}>
+              {choice}
+            </ThemedText>
           </Pressable>
         );
       })}
@@ -132,7 +152,7 @@ function AnswerColumn({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill as any,
-    backgroundColor: 'rgba(36, 54, 36, 0.4)',
+    backgroundColor: 'rgba(36, 59, 100, 0.65)',
     justifyContent: 'center',
     padding: Spacing.three,
     zIndex: 30,
@@ -142,16 +162,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.three,
+    padding: Spacing.four,
     gap: Spacing.two,
     maxHeight: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   vsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: Spacing.one,
+  },
+  vsBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   side: {
     alignItems: 'center',
@@ -167,6 +203,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 48,
     lineHeight: 52,
+    fontWeight: '900',
+  },
+  questionText: {
+    fontSize: 16,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  resultBox: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.three,
+    marginVertical: Spacing.one,
   },
   columns: {
     flexDirection: 'row',
@@ -180,5 +228,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: BorderRadius.md,
     padding: Spacing.two,
+    minHeight: 44,
+    justifyContent: 'center',
   },
 });

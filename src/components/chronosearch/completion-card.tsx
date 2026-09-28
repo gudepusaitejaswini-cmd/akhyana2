@@ -32,12 +32,12 @@ export function ChronoSearchCompletionCard({
 
   return (
     <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
-      <AnnotationTag label="Hunt complete" variant="highlight" />
+      <AnnotationTag label="Hunt complete" variant="action" />
       <ThemedText type="editorialHeader">The grid is read.</ThemedText>
       <ThemedText type="small" themeColor="textSecondary">
         {eraTitle} · {puzzleTitle}
       </ThemedText>
-      <ThemedText type="statValue">{breakdown.total}</ThemedText>
+      <ThemedText type="statValue" style={{ color: theme.accent }}>{breakdown.total}</ThemedText>
       <ThemedText type="caption" themeColor="textMuted">
         Score · {breakdown.xpEarned} XP earned
       </ThemedText>
@@ -52,7 +52,7 @@ export function ChronoSearchCompletionCard({
           Time: {formatElapsed(elapsedSeconds)}
         </ThemedText>
       </View>
-      <Button title="Hunt this era again" onPress={onReplay} />
+      <Button title="Hunt this era again" variant="action" onPress={onReplay} />
       <Button title="Return to Games" variant="outline" onPress={onReturnToGames} />
     </View>
   );

@@ -8,7 +8,7 @@ import { useTheme } from '@/hooks/use-theme';
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'text' | 'subtle';
+  variant?: 'primary' | 'secondary' | 'action' | 'discovery' | 'achievement' | 'outline' | 'text' | 'subtle';
   size?: 'sm' | 'md' | 'lg';
   icon?: string;
   disabled?: boolean;
@@ -30,10 +30,18 @@ export function Button({
   let textColor: string = theme.primaryText;
   let borderColor: string = 'transparent';
 
-  if (variant === 'secondary') {
-    backgroundColor = theme.backgroundElement;
-    textColor = theme.text;
-    borderColor = theme.border;
+  if (variant === 'secondary' || variant === 'action') {
+    backgroundColor = theme.secondary; // Terracotta #C96B4B
+    textColor = theme.primaryText; // #FFFDF7
+    borderColor = 'transparent';
+  } else if (variant === 'discovery') {
+    backgroundColor = theme.discovery; // Muted Teal #3F7C78
+    textColor = theme.primaryText; // #FFFDF7
+    borderColor = 'transparent';
+  } else if (variant === 'achievement') {
+    backgroundColor = theme.accent; // Muted Gold #D4A84F
+    textColor = theme.primary; // Deep Indigo #243B64
+    borderColor = 'transparent';
   } else if (variant === 'outline') {
     backgroundColor = 'transparent';
     textColor = theme.primary;
@@ -44,8 +52,8 @@ export function Button({
     borderColor = 'transparent';
   } else if (variant === 'subtle') {
     backgroundColor = theme.backgroundElement;
-    textColor = theme.textSecondary;
-    borderColor = 'transparent';
+    textColor = theme.text;
+    borderColor = theme.border;
   }
 
   const isSmall = size === 'sm';

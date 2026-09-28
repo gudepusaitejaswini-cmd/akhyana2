@@ -45,9 +45,9 @@ export function ChronoSearchChallengeCard({
             let borderColor: string = theme.border;
             let textColor: string = theme.text;
             if (isSelected && hasAnswered) {
-              backgroundColor = isCorrect ? theme.successLight : theme.accentLight;
-              borderColor = isCorrect ? theme.success : theme.accent;
-              textColor = isCorrect ? theme.success : theme.accentText;
+              backgroundColor = isCorrect ? theme.successLight : theme.errorLight;
+              borderColor = isCorrect ? theme.success : theme.error;
+              textColor = isCorrect ? theme.success : theme.error;
             }
 
             return (
@@ -67,17 +67,17 @@ export function ChronoSearchChallengeCard({
           <>
             <AnnotationTag
               label={isCorrect ? 'Accurate' : 'Not quite'}
-              variant={isCorrect ? 'highlight' : 'accent'}
+              variant={isCorrect ? 'success' : 'error'}
             />
             <ThemedText type="small" themeColor="textSecondary">
               {challenge.explanation}
             </ThemedText>
             {isCorrect ? (
-              <ThemedText type="smallBold" style={{ color: theme.primary }}>
+              <ThemedText type="smallBold" style={{ color: theme.accent }}>
                 +{xpAwarded} XP
               </ThemedText>
             ) : null}
-            <Button title="Continue the hunt" onPress={onContinue} />
+            <Button title="Continue the hunt" variant="action" onPress={onContinue} />
           </>
         ) : null}
       </View>
@@ -88,7 +88,7 @@ export function ChronoSearchChallengeCard({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(36, 54, 36, 0.35)',
+    backgroundColor: 'rgba(36, 59, 100, 0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: Spacing.four,

@@ -46,12 +46,11 @@ export function LudoBoard({ players, tokens, legalIds, disabled, onTokenPress }:
   );
 
   return (
-    <View style={[styles.board, { backgroundColor: '#FCFCFA', borderColor: theme.cardBorder }]}>
+    <View style={[styles.board, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
       {SEATS.map((seat) => {
         const area = BASE_AREAS[seat];
         const color = colorBySeat.get(seat) ?? theme.border;
         return (
-          
           <View
             key={`base-${seat}`}
             pointerEvents="none"
@@ -68,16 +67,14 @@ export function LudoBoard({ players, tokens, legalIds, disabled, onTokenPress }:
               },
             ]}
           >
-            <View style={{ flex: 1, backgroundColor: '#FFFFFF', borderRadius: 8 }} />
+            <View style={{ flex: 1, backgroundColor: theme.surface, borderRadius: 8 }} />
           </View>
-
         );
       })}
       {SEATS.map((seat) =>
         HOME_PATH_CELLS[seat].map((cell, index) => {
-          const color = colorBySeat.get(seat) ?? theme.sage;
+          const color = colorBySeat.get(seat) ?? theme.primaryLight;
           return (
-            
             <View
               key={`home-${seat}-${index}`}
               pointerEvents="none"
@@ -95,7 +92,6 @@ export function LudoBoard({ players, tokens, legalIds, disabled, onTokenPress }:
                 },
               ]}
             />
-
           );
         }),
       )}
@@ -117,7 +113,7 @@ export function LudoBoard({ players, tokens, legalIds, disabled, onTokenPress }:
                 width: `${100 / 15}%`,
                 height: `${100 / 15}%`,
                 borderColor: theme.border,
-                backgroundColor: safe ? theme.border : theme.card,
+                backgroundColor: safe ? theme.backgroundSelected : theme.card,
               },
             ]}
           />
@@ -177,7 +173,10 @@ export function LudoBoard({ players, tokens, legalIds, disabled, onTokenPress }:
 const styles = StyleSheet.create({
   board: {
     width: '100%',
+    maxWidth: 350,
+    maxHeight: 350,
     aspectRatio: 1,
+    alignSelf: 'center',
     borderWidth: 2,
     borderRadius: 12,
     borderColor: '#D8D8D0',

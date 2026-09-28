@@ -30,14 +30,14 @@ export function ChronoSearchWordList({ words, foundIds }: ChronoSearchWordListPr
               style={[
                 styles.chip,
                 {
-                  backgroundColor: isFound ? '#50613E' : 'transparent',
-                  borderColor: isFound ? '#50613E' : theme.borderStrong,
-                  borderWidth: isFound ? 0 : 1,
+                  backgroundColor: isFound ? theme.discovery : theme.card,
+                  borderColor: isFound ? theme.discovery : theme.cardBorder,
+                  borderWidth: 1,
                   paddingHorizontal: 14,
                   paddingVertical: 8,
                 }
               ]}>
-              <ThemedText type="smallBold" style={{ color: isFound ? '#FFFFFF' : theme.textMuted }}>
+              <ThemedText type="smallBold" style={{ color: isFound ? theme.surface : theme.mutedText }}>
                 {isFound ? `✓ ${word.displayLabel}` : `○ ${word.displayLabel}`}
               </ThemedText>
             </View>

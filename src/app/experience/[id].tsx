@@ -220,13 +220,13 @@ export default function ExperienceDetailScreen() {
                               backgroundColor: isSelected
                                 ? opt.isHistoricallyAccurate
                                   ? theme.successLight
-                                  : theme.accentLight
-                                : theme.backgroundElement,
+                                  : theme.errorLight
+                                : theme.card,
                               borderColor: isSelected
                                 ? opt.isHistoricallyAccurate
                                   ? theme.success
-                                  : theme.accent
-                                : theme.border,
+                                  : theme.error
+                                : theme.cardBorder,
                             },
                             pressed && styles.pressed,
                           ]}>
@@ -236,7 +236,7 @@ export default function ExperienceDetailScreen() {
                               color: isSelected
                                 ? opt.isHistoricallyAccurate
                                   ? theme.success
-                                  : theme.accentText
+                                  : theme.error
                                 : theme.text,
                             }}>
                             {opt.label}
@@ -246,14 +246,14 @@ export default function ExperienceDetailScreen() {
                             <View style={styles.consequenceBox}>
                               <AnnotationTag
                                 label={opt.isHistoricallyAccurate ? 'HISTORICALLY ACCURATE' : 'HISTORICAL FLAW'}
-                                variant={opt.isHistoricallyAccurate ? 'highlight' : 'accent'}
+                                variant={opt.isHistoricallyAccurate ? 'success' : 'error'}
                               />
                               <ThemedText
                                 type="small"
                                 style={{
                                   color: opt.isHistoricallyAccurate
                                     ? theme.success
-                                    : theme.accentText,
+                                    : theme.error,
                                   lineHeight: 20,
                                 }}>
                                 {opt.historicalConsequence}
@@ -283,7 +283,7 @@ export default function ExperienceDetailScreen() {
                       : 'COMPLETE EXHIBIT ✓'
                   }
                   size="md"
-                  variant="primary"
+                  variant="action"
                   onPress={handleNextStep}
                 />
               </View>
@@ -320,7 +320,7 @@ export default function ExperienceDetailScreen() {
                     styles.rewardStatBox,
                     { backgroundColor: theme.backgroundElement, borderLeftColor: theme.primary },
                   ]}>
-                  <ThemedText type="statValue" style={{ color: theme.primary }}>
+                  <ThemedText type="statValue" style={{ color: theme.accent }}>
                     +{experience.xpReward} XP
                   </ThemedText>
                   <ThemedText type="annotation" themeColor="textMuted">
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(36, 59, 100, 0.65)',
     padding: Spacing.four,
   },
   modalContent: {

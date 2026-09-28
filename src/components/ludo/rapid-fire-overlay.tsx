@@ -39,8 +39,8 @@ export function RapidFireOverlay({ playerName, onComplete }: { playerName: strin
   if (!topic) {
     return (
       <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderStrong }]}>
-          <AnnotationTag label={playerName.toUpperCase()} variant="highlight" />
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
+          <AnnotationTag label={playerName.toUpperCase()} variant="action" />
           <ThemedText type="editorialHeader" style={{ textAlign: 'center', marginTop: 12 }}>
             Choose your challenge topic
           </ThemedText>
@@ -71,8 +71,8 @@ export function RapidFireOverlay({ playerName, onComplete }: { playerName: strin
   if (isFinished) {
     return (
       <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderStrong, alignItems: 'center' }]}>
-          <AnnotationTag label="HISTORICAL CHALLENGE COMPLETE" variant="highlight" />
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.accent, alignItems: 'center' }]}>
+          <AnnotationTag label="HISTORICAL CHALLENGE COMPLETE" variant="accent" />
           <ThemedText type="heroDisplay" style={{ marginTop: 24 }}>
             {score} / 6 CORRECT
           </ThemedText>
@@ -84,7 +84,7 @@ export function RapidFireOverlay({ playerName, onComplete }: { playerName: strin
             </View>
           </View>
           
-          <Button title="CONTINUE TO BOARD →" size="lg" variant="primary" onPress={() => onComplete(score)} />
+          <Button title="CONTINUE TO BOARD →" size="lg" variant="action" onPress={() => onComplete(score)} />
         </View>
       </View>
     );
@@ -94,9 +94,9 @@ export function RapidFireOverlay({ playerName, onComplete }: { playerName: strin
 
   return (
     <View style={styles.overlay}>
-      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.borderStrong }]}>
+      <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <AnnotationTag label={`QUESTION ${qIndex + 1} / 6`} variant="highlight" />
+          <AnnotationTag label={`QUESTION ${qIndex + 1} / 6`} variant="discovery" />
           <ThemedText type="smallBold" style={{ color: theme.success }}>CORRECT: {score}</ThemedText>
         </View>
         
@@ -126,7 +126,7 @@ export function RapidFireOverlay({ playerName, onComplete }: { playerName: strin
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFill as any,
-    backgroundColor: 'rgba(36, 54, 36, 0.6)',
+    backgroundColor: 'rgba(36, 59, 100, 0.65)',
     justifyContent: 'center',
     padding: Spacing.four,
     zIndex: 40,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     padding: Spacing.four,
     width: '100%',
-    shadowColor: '#000',
+    shadowColor: '#243B64',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.15,
     shadowRadius: 20,

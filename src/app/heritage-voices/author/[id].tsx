@@ -21,7 +21,7 @@ export default function HeritageAuthorScreen() {
       <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + 20 }]}>
         <Text style={[styles.notFound, { color: colors.text }]}>Expert profile not found.</Text>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={{ color: colors.oliveDark, fontWeight: '700' }}>← Go Back</Text>
+          <Text style={{ color: colors.primary, fontWeight: '700' }}>← Go Back</Text>
         </Pressable>
       </View>
     );
@@ -37,7 +37,7 @@ export default function HeritageAuthorScreen() {
         showsVerticalScrollIndicator={false}>
         {/* Back Button */}
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={[styles.backBtnText, { color: colors.oliveDark }]}>← Back</Text>
+          <Text style={[styles.backBtnText, { color: colors.primary }]}>← Back</Text>
         </Pressable>
 
         {/* Profile Header */}

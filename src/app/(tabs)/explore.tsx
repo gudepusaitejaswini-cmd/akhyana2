@@ -26,12 +26,187 @@ export default function ExploreScreen() {
     );
   }, [query]);
 
-  return <ThemedView style={styles.screen}><ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top || Spacing.four, paddingBottom: insets.bottom + BottomTabInset + Spacing.six }]} showsVerticalScrollIndicator={false}><View style={styles.wrapper}>
-    <AkhyanaHeader showTagline={false} subtitle="EXPLORE" />
-    <View style={styles.hero}><ThemedText type="annotation" style={{ color: theme.accent }}>AKHYANA TIME BROWSER</ThemedText><ThemedText type="heroDisplay">EXPLORE INDIA{`\n`}THROUGH TIME.</ThemedText><ThemedText type="editorialLead" themeColor="textSecondary">Choose a time window, then open a historically curated event. Opening an event moves you into Learn.</ThemedText></View>
-    <View style={styles.section}><ThemedText type="sectionHeader">SEARCH / YEAR / DECADE</ThemedText><View style={[styles.search, { backgroundColor: theme.card, borderColor: theme.border }]}><TextInput value={query} onChangeText={setQuery} placeholder="Search a year or decade..." placeholderTextColor={theme.textMuted} keyboardType="numbers-and-punctuation" autoCapitalize="none" autoCorrect={false} style={[styles.input, { color: theme.text }]} />{query.length > 0 && <Pressable accessibilityRole="button" accessibilityLabel="Clear time-window search" hitSlop={8} onPress={() => setQuery('')} style={styles.clear}><ThemedText type="smallBold" style={{ color: theme.primary }}>CLEAR</ThemedText></Pressable>}</View></View>
-    <View style={styles.section}><ThemedText type="sectionHeader">TIME WINDOWS</ThemedText>{matchingWindows.length === 0 ? <View style={[styles.empty, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]}><ThemedText type="cardTitle">NO TIME WINDOW FOUND</ThemedText><ThemedText type="small" themeColor="textSecondary">Try 1890s, 1940s, or 2010s.</ThemedText></View> : matchingWindows.map((window) => <Pressable key={window.id} onPress={() => { setActiveDecadeId(window.id); router.push(`/decade/${window.id}`); }} style={({ pressed }) => [styles.card, { backgroundColor: activeDecadeId === window.id ? theme.primaryLight : theme.card, borderColor: activeDecadeId === window.id ? theme.primary : theme.border }, pressed && styles.pressed]}><AnnotationTag label={`${window.startYear}–${window.endYear - 1}`} variant="highlight" /><ThemedText type="editorialHeader">{window.label}</ThemedText><ThemedText type="small" themeColor="textSecondary">{window.description}</ThemedText><ThemedText type="smallBold" style={{ color: theme.primary }}>VIEW EVENTS →</ThemedText></Pressable>)}</View>
-  </View></ScrollView></ThemedView>;
+  return (
+    <ThemedView style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: insets.top || Spacing.four,
+            paddingBottom: insets.bottom + BottomTabInset + Spacing.six,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.wrapper}>
+          <AkhyanaHeader showTagline={false} subtitle="EXPLORE" />
+
+          <View style={styles.hero}>
+            <AnnotationTag label="HISTORICAL DISCOVERY" variant="discovery" />
+            <ThemedText type="heroDisplay" style={{ color: theme.primary }}>
+              EXPLORE INDIA{`\n`}THROUGH TIME.
+            </ThemedText>
+            <ThemedText type="editorialLead" themeColor="textSecondary">
+              Uncover centuries of documented history across curated chronological windows. Select an era to explore authentic milestones and primary evidence.
+            </ThemedText>
+          </View>
+
+          <View style={styles.section}>
+            <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
+              SEARCH / YEAR / DECADE
+            </ThemedText>
+            <View
+              style={[
+                styles.search,
+                { backgroundColor: theme.card, borderColor: theme.cardBorder },
+              ]}>
+              <ThemedText style={{ fontSize: 16, marginRight: 8, color: theme.discovery }}>
+                🔍
+              </ThemedText>
+              <TextInput
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Search a year, era, or decade (e.g. 1950s)..."
+                placeholderTextColor={theme.textMuted}
+                keyboardType="numbers-and-punctuation"
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={[styles.input, { color: theme.text }]}
+              />
+              {query.length > 0 && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear time-window search"
+                  hitSlop={8}
+                  onPress={() => setQuery('')}
+                  style={styles.clear}>
+                  <ThemedText type="smallBold" style={{ color: theme.discovery }}>
+                    CLEAR
+                  </ThemedText>
+                </Pressable>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
+                CHRONOLOGICAL WINDOWS
+              </ThemedText>
+              <ThemedText type="caption" themeColor="textMuted">
+                {matchingWindows.length} documented eras
+              </ThemedText>
+            </View>
+
+            {matchingWindows.length === 0 ? (
+              <View
+                style={[
+                  styles.empty,
+                  { backgroundColor: theme.backgroundElement, borderColor: theme.border },
+                ]}>
+                <ThemedText type="cardTitle" style={{ color: theme.primary }}>
+                  NO TIME WINDOW FOUND
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  Try searching 1890s, 1940s, 1950s, or 2010s.
+                </ThemedText>
+              </View>
+            ) : (
+              matchingWindows.map((window) => {
+                const isSelected = activeDecadeId === window.id;
+                return (
+                  <Pressable
+                    key={window.id}
+                    onPress={() => {
+                      setActiveDecadeId(window.id);
+                      router.push(`/decade/${window.id}`);
+                    }}
+                    style={({ pressed }) => [
+                      styles.card,
+                      {
+                        backgroundColor: isSelected ? theme.discoveryLight : theme.card,
+                        borderColor: isSelected ? theme.discovery : theme.cardBorder,
+                      },
+                      pressed && styles.pressed,
+                    ]}>
+                    <View style={styles.cardHeaderRow}>
+                      <AnnotationTag
+                        label={`${window.startYear}–${window.endYear - 1}`}
+                        variant={isSelected ? 'discovery' : 'default'}
+                      />
+                      <ThemedText type="annotation" style={{ color: theme.discovery }}>
+                        TIMELINE ERA
+                      </ThemedText>
+                    </View>
+
+                    <ThemedText type="editorialHeader" style={{ color: theme.primary }}>
+                      {window.label}
+                    </ThemedText>
+
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {window.description}
+                    </ThemedText>
+
+                    <View style={styles.cardFooter}>
+                      <ThemedText type="smallBold" style={{ color: theme.discovery }}>
+                        EXPLORE ERA EVENTS →
+                      </ThemedText>
+                    </View>
+                  </Pressable>
+                );
+              })
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </ThemedView>
+  );
 }
 
-const styles = StyleSheet.create({ screen: { flex: 1 }, content: { alignItems: 'center' }, wrapper: { width: '100%', maxWidth: MaxContentWidth }, hero: { paddingHorizontal: Spacing.four, paddingTop: Spacing.four, gap: Spacing.two }, section: { paddingHorizontal: Spacing.four, paddingTop: Spacing.six, gap: Spacing.three }, search: { minHeight: 54, borderWidth: 1, borderRadius: BorderRadius.lg, flexDirection: 'row', alignItems: 'center', paddingLeft: Spacing.three, paddingRight: Spacing.two }, input: { flex: 1, minWidth: 0, fontSize: 16, paddingVertical: Spacing.three }, clear: { minHeight: 40, justifyContent: 'center', paddingHorizontal: Spacing.two }, card: { borderWidth: 1, borderRadius: BorderRadius.xl, padding: Spacing.four, gap: Spacing.two }, empty: { borderWidth: 1, borderRadius: BorderRadius.lg, padding: Spacing.four, gap: Spacing.one }, pressed: { opacity: 0.82 } });
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  content: { alignItems: 'center' },
+  wrapper: { width: '100%', maxWidth: MaxContentWidth },
+  hero: { paddingHorizontal: Spacing.four, paddingTop: Spacing.four, gap: Spacing.two },
+  section: { paddingHorizontal: Spacing.four, paddingTop: Spacing.six, gap: Spacing.two },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: Spacing.one,
+  },
+  search: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: Spacing.three,
+    paddingRight: Spacing.two,
+  },
+  input: { flex: 1, minWidth: 0, fontSize: 15, paddingVertical: Spacing.two },
+  clear: { minHeight: 40, justifyContent: 'center', paddingHorizontal: Spacing.two },
+  card: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.four,
+    gap: Spacing.two,
+    shadowColor: '#243B64',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  cardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  cardFooter: {
+    paddingTop: Spacing.two,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#E8E1D3',
+    marginTop: Spacing.one,
+  },
+  empty: { borderWidth: 1, borderRadius: BorderRadius.lg, padding: Spacing.four, gap: Spacing.one },
+  pressed: { opacity: 0.85, transform: [{ scale: 0.99 }] },
+});

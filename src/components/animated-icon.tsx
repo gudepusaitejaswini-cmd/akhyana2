@@ -57,16 +57,18 @@ export function AnimatedSplashOverlay() {
   );
 }
 
+import { Colors } from '@/constants/theme';
+
 const styles = StyleSheet.create({
   splashOverlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.light.background,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 1000,
   },
   wordmark: {
-    color: '#28351F',
+    color: Colors.light.primary,
     fontSize: 20,
     fontWeight: '800',
     letterSpacing: 4,

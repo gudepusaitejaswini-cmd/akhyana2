@@ -8,7 +8,7 @@ interface EditorialCardProps {
   children: React.ReactNode;
   style?: ViewStyle | ViewStyle[];
   onPress?: () => void;
-  variant?: 'default' | 'highlight' | 'muted' | 'accent';
+  variant?: 'default' | 'highlight' | 'muted' | 'accent' | 'discovery';
   noPadding?: boolean;
 }
 
@@ -26,10 +26,13 @@ export function EditorialCard({
 
   if (variant === 'highlight') {
     backgroundColor = theme.primaryLight;
-    borderColor = theme.secondary;
+    borderColor = theme.primary;
   } else if (variant === 'accent') {
     backgroundColor = theme.accentLight;
     borderColor = theme.accent;
+  } else if (variant === 'discovery') {
+    backgroundColor = theme.discoveryLight;
+    borderColor = theme.discovery;
   } else if (variant === 'muted') {
     backgroundColor = theme.backgroundElement;
     borderColor = theme.border;
@@ -65,13 +68,18 @@ export function EditorialCard({
 
 const styles = StyleSheet.create({
   pressable: {
-    borderRadius: BorderRadius.xl,
+    borderRadius: BorderRadius.lg,
   },
   card: {
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     padding: Spacing.four,
     overflow: 'hidden',
+    shadowColor: '#243B64',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 1,
   },
   noPadding: {
     padding: 0,

@@ -51,7 +51,7 @@ export default function ArticleSubmitScreen() {
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={[styles.contentWrapper, { paddingTop: insets.top + 20 }]}>
           <Pressable onPress={() => router.back()} style={styles.backBtn}>
-            <Text style={[styles.backBtnText, { color: colors.oliveDark }]}>← Back</Text>
+            <Text style={[styles.backBtnText, { color: colors.primary }]}>← Back</Text>
           </Pressable>
 
           <View style={[styles.warningCard, { backgroundColor: colors.warningLight, borderColor: colors.warning }]}>
@@ -146,7 +146,7 @@ export default function ArticleSubmitScreen() {
         showsVerticalScrollIndicator={false}>
         {/* Back Navigation */}
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Text style={[styles.backBtnText, { color: colors.oliveDark }]}>← Back</Text>
+          <Text style={[styles.backBtnText, { color: colors.primary }]}>← Back</Text>
         </Pressable>
 
         {step < 4 && (
@@ -350,7 +350,7 @@ export default function ArticleSubmitScreen() {
 
             <View style={[styles.previewCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
               <Text style={[styles.previewTitle, { color: colors.text }]}>{title}</Text>
-              <Text style={{ fontSize: 12, color: colors.oliveDark, marginBottom: 8 }}>
+              <Text style={{ fontSize: 12, color: colors.primary, marginBottom: 8 }}>
                 Author: {activeExpert.name} · {category}
               </Text>
               <Text style={[styles.previewSummary, { color: colors.textSecondary }]}>{summary}</Text>

@@ -46,12 +46,13 @@ export function ChronoSearchHud({
 
 function HudStat({ label, value }: { label: string; value: string }) {
   const theme = useTheme();
+  const isXpOrScore = label === 'Score' || label === 'XP';
   return (
-    <View style={[styles.stat, { backgroundColor: '#F3F4F0', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flex: 1, marginHorizontal: 2, alignItems: 'center' }]}>
-      <ThemedText type="annotation" style={{ color: '#50613E', fontSize: 10 }}>
+    <View style={[styles.stat, { backgroundColor: theme.backgroundElement, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, flex: 1, marginHorizontal: 2, alignItems: 'center' }]}>
+      <ThemedText type="annotation" style={{ color: isXpOrScore ? theme.accent : theme.textSecondary, fontSize: 10 }}>
         {label.toUpperCase()}
       </ThemedText>
-      <ThemedText type="smallBold" style={{ color: '#243624', marginTop: 2 }}>{value}</ThemedText>
+      <ThemedText type="smallBold" style={{ color: theme.primary, marginTop: 2 }}>{value}</ThemedText>
     </View>
   );
 }

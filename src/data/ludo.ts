@@ -6,28 +6,28 @@ export const LUDO_CIVILIZATIONS = [
     name: 'Indus Valley',
     short: 'Indus',
     period: 'c. 2600–1900 BCE',
-    color: '#243624',
+    color: '#243B64', // Deep Indigo
   },
   {
     id: 'maurya',
     name: 'Mauryan Empire',
     short: 'Maurya',
     period: 'c. 322–185 BCE',
-    color: '#50613E',
+    color: '#C96B4B', // Terracotta
   },
   {
     id: 'chola',
     name: 'Chola Period',
     short: 'Chola',
     period: 'c. 9th–13th century',
-    color: '#7D7246',
+    color: '#D4A84F', // Muted Gold
   },
   {
     id: 'gupta',
     name: 'Gupta Period',
     short: 'Gupta',
     period: 'c. 319–550 CE',
-    color: '#657546',
+    color: '#3F7C78', // Muted Teal
   },
 ] as const;
 

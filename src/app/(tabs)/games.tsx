@@ -37,7 +37,7 @@ export default function GamesScreen() {
           <AkhyanaHeader showTagline={false} />
 
           <View style={styles.titleSection}>
-            <ThemedText type="heroDisplay" style={styles.pageTitle}>
+            <ThemedText type="heroDisplay" style={[styles.pageTitle, { color: theme.primary }]}>
               PLAY WITH{'\n'}HISTORY.
             </ThemedText>
             <ThemedText type="editorialLead" themeColor="textSecondary" style={styles.pageLead}>
@@ -51,10 +51,10 @@ export default function GamesScreen() {
             <View
               style={[
                 styles.philosophyBlock,
-                { backgroundColor: theme.backgroundElement, borderLeftColor: theme.primary },
+                { backgroundColor: theme.backgroundElement, borderLeftColor: theme.secondary },
               ]}>
-              <AnnotationTag label="01 — PLAYABLE" variant="highlight" />
-              <ThemedText type="editorialHeader" style={styles.philosophyHeading}>
+              <AnnotationTag label="01 — ACTIVE PLAY" variant="action" />
+              <ThemedText type="editorialHeader" style={[styles.philosophyHeading, { color: theme.primary }]}>
                 Search → Discover → Learn → Earn XP
               </ThemedText>
               <ThemedText type="small" themeColor="textSecondary" style={styles.philosophyBody}>
@@ -68,17 +68,17 @@ export default function GamesScreen() {
           <View style={styles.featuredGameSection}>
             <View style={styles.featuredHeaderRow}>
               <AnnotationTag label="CHRONOSEARCH" variant="highlight" />
-              <ThemedText type="annotation" style={{ color: theme.accent }}>
-                SESSION XP
+              <ThemedText type="annotation" style={{ color: theme.accent, fontWeight: '800' }}>
+                SESSION XP + REWARDS
               </ThemedText>
             </View>
 
-            <ThemedText type="heroDisplay" style={styles.gameHeroTitle}>
+            <ThemedText type="heroDisplay" style={[styles.gameHeroTitle, { color: theme.primary }]}>
               HUNT THROUGH{'\n'}HISTORY.
             </ThemedText>
 
             <ThemedText type="annotation" style={{ color: theme.textMuted }}>
-              WORD SEARCH • SOLO
+              WORD SEARCH • SOLO DISCOVERY
             </ThemedText>
 
             <ThemedText type="editorialLead" themeColor="textSecondary">
@@ -90,7 +90,7 @@ export default function GamesScreen() {
                 styles.howItWorksBox,
                 { backgroundColor: theme.card, borderColor: theme.cardBorder },
               ]}>
-              <ThemedText type="sectionHeader" themeColor="text">
+              <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
                 HOW IT WORKS
               </ThemedText>
               <View style={styles.stepsList}>
@@ -101,11 +101,11 @@ export default function GamesScreen() {
                   { step: '04', title: 'CHALLENGE', desc: 'Important words may ask one follow-up question.' },
                 ].map((item) => (
                   <View key={item.step} style={styles.stepItem}>
-                    <ThemedText type="annotation" style={{ color: theme.accent }}>
+                    <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '800' }}>
                       {item.step}
                     </ThemedText>
                     <View style={styles.stepContent}>
-                      <ThemedText type="smallBold">{item.title}</ThemedText>
+                      <ThemedText type="smallBold" style={{ color: theme.text }}>{item.title}</ThemedText>
                       <ThemedText type="caption" themeColor="textSecondary">
                         {item.desc}
                       </ThemedText>
@@ -118,7 +118,7 @@ export default function GamesScreen() {
             <Button
               title="BEGIN CHRONOSEARCH →"
               size="lg"
-              variant="primary"
+              variant="action"
               onPress={() => router.push('/game/chronosearch')}
             />
           </View>
@@ -127,29 +127,29 @@ export default function GamesScreen() {
 
           {ludo ? (
             <View style={styles.secondaryGamesSection}>
-              <ThemedText type="sectionHeader" themeColor="text">
-                02 — NEXT GAME
+              <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
+                02 — STRATEGY & HISTORICAL DUELS
               </ThemedText>
               <Pressable
                 onPress={() => router.push('/game/ludo')}
                 style={({ pressed }) => [
                   styles.secondaryGameRow,
-                  { borderBottomColor: theme.border },
+                  { borderBottomColor: theme.cardBorder },
                   pressed && styles.pressed,
                 ]}>
                 <View style={styles.gameNumCol}>
-                  <ThemedText type="annotation" style={{ color: theme.textMuted }}>
+                  <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '800' }}>
                     02
                   </ThemedText>
                 </View>
                 <View style={styles.gameMainCol}>
                   <View style={styles.gameTitleLine}>
-                    <ThemedText type="cardTitle" style={styles.secGameTitle}>
+                    <ThemedText type="cardTitle" style={[styles.secGameTitle, { color: theme.primary }]}>
                       {ludo.name}
                     </ThemedText>
-                    <AnnotationTag label="PLAYABLE" variant="highlight" />
+                    <AnnotationTag label="PLAYABLE" variant="accent" />
                   </View>
-                  <ThemedText type="annotation" style={{ color: theme.accent }}>
+                  <ThemedText type="annotation" style={{ color: theme.secondary }}>
                     [{ludo.categoryLabel.toUpperCase()}]
                   </ThemedText>
                   <ThemedText type="small" themeColor="textSecondary" style={styles.secGameDesc}>
@@ -157,8 +157,8 @@ export default function GamesScreen() {
                   </ThemedText>
                   <View
                     style={[styles.gameplayLoopBox, { backgroundColor: theme.backgroundElement }]}>
-                    <ThemedText type="annotation" style={{ color: theme.textMuted }}>
-                      MECHANIC
+                    <ThemedText type="annotation" style={{ color: theme.primary, fontWeight: '700' }}>
+                      HISTORICAL DUEL MECHANIC
                     </ThemedText>
                     <ThemedText type="caption" themeColor="textSecondary">
                       {ludo.gameplayPreview}
@@ -170,7 +170,7 @@ export default function GamesScreen() {
                       styles.howItWorksBox,
                       { backgroundColor: theme.card, borderColor: theme.cardBorder, marginTop: 12 },
                     ]}>
-                    <ThemedText type="sectionHeader" themeColor="text">
+                    <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
                       HOW IT WORKS
                     </ThemedText>
                     <View style={styles.stepsList}>
@@ -183,11 +183,11 @@ export default function GamesScreen() {
                         { step: '06', title: 'CAPTURE OR DEFEND', desc: 'Both players receive the same history question. The correct/fastest response determines whether the attacking player captures the token or the defender stops the attack.' },
                       ].map((item) => (
                         <View key={item.step} style={styles.stepItem}>
-                          <ThemedText type="annotation" style={{ color: theme.accent }}>
+                          <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '800' }}>
                             {item.step}
                           </ThemedText>
                           <View style={styles.stepContent}>
-                            <ThemedText type="smallBold">{item.title}</ThemedText>
+                            <ThemedText type="smallBold" style={{ color: theme.text }}>{item.title}</ThemedText>
                             <ThemedText type="caption" themeColor="textSecondary">
                               {item.desc}
                             </ThemedText>
@@ -196,7 +196,7 @@ export default function GamesScreen() {
                       ))}
                     </View>
                   </View>
-                  <ThemedText type="smallBold" style={{ color: theme.primary, marginTop: 4 }}>
+                  <ThemedText type="smallBold" style={{ color: theme.secondary, marginTop: 4 }}>
                     Begin match →
                   </ThemedText>
                 </View>

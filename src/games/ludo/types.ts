@@ -1,11 +1,29 @@
 export type LudoSeat = 0 | 1 | 2 | 3;
 
 export type LudoPhase =
-  | 'rolling'
+  | 'pass_turn'
+  | 'turn_quiz'
+  | 'quiz_summary'
   | 'selecting'
   | 'duel'
   | 'discovery'
   | 'complete';
+
+/**
+ * Summary shown during the pass-and-play transition after a turn ends.
+ */
+export interface LastTurnSummary {
+  playerSeat: LudoSeat;
+  playerName: string;
+  playerColor: string;
+  correctCount: number;
+  totalQuestions: number;
+  spacesMoved: number;
+  nextSeat: LudoSeat;
+  nextPlayerName: string;
+  nextPlayerColor: string;
+  diceRoll?: number;
+}
 
 /**
  * Quiz-cycle phase for the year-based Ludo quiz.
@@ -21,6 +39,7 @@ export interface LudoPlayerConfig {
   civilizationId: string;
   civilizationName: string;
   color: string;
+  isAi?: boolean;
 }
 
 export interface LudoToken {
@@ -70,7 +89,12 @@ export interface LudoGameState {
   tokens: LudoToken[];
   currentSeat: LudoSeat;
   phase: LudoPhase;
+  earnedSteps: number;
   diceValue: number | null;
+  rawDiceRoll: number | null;
+  turnQuestions: LudoDuelQuestion[];
+  currentQuestionIndex: number;
+  correctAnswersCount: number;
   hasRolled: boolean;
   consecutiveSixes: number;
   usedQuestionIds: string[];
@@ -84,6 +108,7 @@ export interface LudoGameState {
   pendingQuestion: LudoDuelQuestion | null;
   winnerSeat: LudoSeat | null;
   turnNonce: number;
+  lastTurnSummary: LastTurnSummary | null;
 }
 
 export const TRACK_LENGTH = 52;

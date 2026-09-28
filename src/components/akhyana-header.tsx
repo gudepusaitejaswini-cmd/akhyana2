@@ -18,7 +18,7 @@ export function AkhyanaHeader({ showTagline = true, subtitle }: AkhyanaHeaderPro
     <View style={styles.container}>
       <View style={styles.topRow}>
         <View style={styles.brandRow}>
-          <ThemedText type="editorialHeader" style={styles.brandWordmark}>
+          <ThemedText type="editorialHeader" style={[styles.brandWordmark, { color: theme.primary }]}>
             AKHYANA
           </ThemedText>
           <View style={[styles.brandDot, { backgroundColor: theme.accent }]} />
@@ -29,10 +29,10 @@ export function AkhyanaHeader({ showTagline = true, subtitle }: AkhyanaHeaderPro
           <ThemedText type="annotation" style={{ color: theme.accent }}>
             JOURNEY {MOCK_USER_PROGRESS.streakDays}D
           </ThemedText>
-          <ThemedText type="annotation" style={{ color: theme.textMuted }}>
+          <ThemedText type="annotation" style={{ color: theme.borderStrong }}>
             /
           </ThemedText>
-          <ThemedText type="annotation" style={{ color: theme.primary }}>
+          <ThemedText type="annotation" style={{ color: theme.primary, fontWeight: '800' }}>
             {MOCK_USER_PROGRESS.currentXp} XP
           </ThemedText>
         </View>

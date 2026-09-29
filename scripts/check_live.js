@@ -10,6 +10,7 @@ async function testAsset(url) {
 async function main() {
   const pages = [
     '/',
+    '/learn',
     '/explore',
     '/games',
     '/game/ludo',

@@ -90,6 +90,9 @@ export default function LudoSetupScreen() {
             </ThemedText>
 
             <Pressable
+              accessibilityRole="button"
+              role="button"
+              accessibilityLabel="Chaupar Rules and How to Play"
               onPress={() => setShowHowToPlay((prev) => !prev)}
               style={({ pressed }) => [
                 styles.howToPlayBtn,

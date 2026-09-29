@@ -26,7 +26,6 @@ import { useTheme } from '@/hooks/use-theme';
 
 export default function LudoPlayScreen() {
   const setup = getLudoSetup();
-  if (!setup || setup.length < 2) return <NotFoundState />;
   return <LudoPlay players={setup} />;
 }
 
@@ -66,6 +65,9 @@ function LudoPlay({ players }: { players: NonNullable<ReturnType<typeof getLudoS
             <View style={styles.topBar}>
               <Button title="← SETUP" size="sm" variant="text" onPress={() => router.replace('/game/ludo')} />
               <Pressable
+                accessibilityRole="button"
+                role="button"
+                accessibilityLabel="Chaupar Rules and How to Play"
                 onPress={() => setShowRulesModal(true)}
                 style={({ pressed }) => [styles.rulesBtn, pressed && { opacity: 0.7 }]}>
                 <ThemedText type="smallBold" style={[styles.gameTitle, { color: theme.primary }]}>

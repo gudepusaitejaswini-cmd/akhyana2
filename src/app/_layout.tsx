@@ -30,7 +30,6 @@ export default function RootLayout() {
           <Stack.Screen name="civilization/[id]" />
           <Stack.Screen name="topic/[id]" />
           <Stack.Screen name="experience/[id]" />
-          <Stack.Screen name="learn/[eventId]/[subtopicId]" />
           <Stack.Screen name="game/[id]" />
           <Stack.Screen name="game/chronosearch/index" />
           <Stack.Screen name="game/chronosearch/[puzzleId]" />

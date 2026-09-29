@@ -4,20 +4,23 @@
     "slug": "akhyana",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/images/akhyana-logo-icon.jpg",
     "scheme": "akhyana",
     "userInterfaceStyle": "light",
     "android": {
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/images/akhyana-logo-icon.jpg"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FFFFFF"
+          "backgroundColor": "#0B332B",
+          "image": "./assets/images/akhyana-logo-icon.jpg"
         }
       ]
     ],

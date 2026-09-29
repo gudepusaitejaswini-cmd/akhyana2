@@ -38,6 +38,15 @@ export default function AppTabs() {
       <Tabs.Screen
         name="index"
         options={{
+          title: 'Home',
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="🏛️" focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="learn"
+        options={{
           title: 'Learn',
           tabBarIcon: ({ focused }) => (
             <TabIcon name="📖" focused={focused} />

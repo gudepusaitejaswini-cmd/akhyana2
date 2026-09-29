@@ -18,19 +18,37 @@ function fetchJson(url) {
   });
 }
 
+const os = require('os');
+const path = require('path');
+const fs = require('fs');
+
 async function run() {
   console.log('=== TARGETED VERIFICATION: LEARN SUBTOPICS & LUDO PLAY ===');
   console.log('Testing target:', BASE_URL);
 
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'edge-e2e-'));
+  const port = 9244;
+
   const edge = spawn(
     EDGE_PATH,
-    ['--headless=new', '--remote-debugging-port=9228', '--disable-gpu', BASE_URL + '/learn'],
+    [
+      '--headless=new',
+      `--remote-debugging-port=${port}`,
+      `--user-data-dir=${tmpDir}`,
+      '--disable-gpu',
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-features=msFirstRunExperience,msEdgeSyncPrompt',
+      '--disable-sync',
+      '--disable-fre',
+      BASE_URL + '/learn'
+    ],
     { stdio: 'ignore' }
   );
 
-  await sleep(4000);
-  const targets = await fetchJson('http://localhost:9228/json/list');
-  const target = targets.find((t) => t.url.includes(BASE_URL) || t.type === 'page');
+  await sleep(5000);
+  const targets = await fetchJson(`http://localhost:${port}/json/list`);
+  const target = targets.find((t) => t.type === 'page' && !t.url.startsWith('edge://')) || targets[0];
   const ws = new WebSocket(target.webSocketDebuggerUrl);
 
   await new Promise((resolve) => {

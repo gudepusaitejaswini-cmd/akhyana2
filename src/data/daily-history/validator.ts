@@ -52,6 +52,10 @@ export function validateAajEvent(event: Partial<AajKaAkhyanaEvent>): ValidationR
     errors.push('Event sourceName is missing.');
   }
 
+  if (!event.sourceUrl || typeof event.sourceUrl !== 'string' || event.sourceUrl.trim() === '') {
+    errors.push('Event sourceUrl is missing or empty.');
+  }
+
   return {
     valid: errors.length === 0,
     errors,

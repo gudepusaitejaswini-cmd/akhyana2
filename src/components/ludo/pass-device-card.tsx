@@ -80,7 +80,7 @@ export function PassDeviceCard({
         <View style={[styles.largePlayerDot, { backgroundColor: currentPlayer.color }]} />
         <View>
           <ThemedText type="annotation" style={{ color: theme.textMuted, letterSpacing: 0.5 }}>
-            HISTORICAL CHALLENGE
+            HISTORICAL QUIZ · 6 QUESTIONS
           </ThemedText>
           <ThemedText type="cardTitle" style={{ color: theme.primary }}>
             {currentPlayer.name.toUpperCase()}'S TURN
@@ -98,7 +98,7 @@ export function PassDeviceCard({
       </View>
 
       <Button
-        title={`START CHALLENGE (6 QUESTIONS) →`}
+        title={`START TURN (6 QUESTIONS) →`}
         size="lg"
         variant="action"
         onPress={onStartTurn}

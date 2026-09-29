@@ -16,6 +16,7 @@ import { BorderRadius, BottomTabInset, MaxContentWidth, Spacing } from '@/consta
 import { EXPERIENCES } from '@/data/experiences';
 import { useTheme } from '@/hooks/use-theme';
 import { heritageGuideService } from '@/services/ai';
+import { recordExhibitViewed, recordQuestionAnswer } from '@/services/user-progress';
 
 export default function ExperienceDetailScreen() {
   const { id, step } = useLocalSearchParams<{ id: string, step?: string }>();
@@ -37,12 +38,28 @@ export default function ExperienceDetailScreen() {
     }
   }, [step]);
 
+  React.useEffect(() => {
+    if (experience) {
+      recordExhibitViewed(experience.id);
+    }
+  }, [experience]);
+
   if (!experience) return <NotFoundState />;
 
   const currentStep = experience.subtopics[currentStepIndex] || experience.subtopics[0];
   const stepProgress = Math.round(((currentStepIndex + 1) / experience.subtopics.length) * 100);
 
   const handleSelectOption = (idx: number) => {
+    if (selectedOptionIndex === null && currentStep.options?.[idx]) {
+      const opt = currentStep.options[idx];
+      recordQuestionAnswer({
+        questionId: `${experience.id}-step-${currentStep.stepNumber}`,
+        isCorrect: opt.isHistoricallyAccurate,
+        topicId: experience.topicId,
+        category: 'Ancient India',
+        promptOrText: currentStep.choicePrompt || currentStep.title,
+      });
+    }
     setSelectedOptionIndex(idx);
   };
 

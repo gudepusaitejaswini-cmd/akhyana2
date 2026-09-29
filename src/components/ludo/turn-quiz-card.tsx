@@ -12,6 +12,7 @@ interface TurnQuizCardProps {
   questions: LudoDuelQuestion[];
   currentIndex: number;
   correctCount: number;
+  totalQuestions?: number;
   selectedChoice: number | null;
   isSubmitted: boolean;
   onSelectChoice: (choiceIndex: number) => void;
@@ -26,6 +27,7 @@ export function TurnQuizCard({
   questions,
   currentIndex,
   correctCount,
+  totalQuestions = 6,
   selectedChoice,
   isSubmitted,
   onSelectChoice,
@@ -36,7 +38,7 @@ export function TurnQuizCard({
   const question = questions[currentIndex];
   if (!question) return null;
 
-  const total = questions.length;
+  const total = totalQuestions || 6;
   const isLastQuestion = currentIndex + 1 >= total;
   const isSelectedChoiceCorrect =
     selectedChoice !== null && selectedChoice === question.correctIndex;
@@ -49,7 +51,7 @@ export function TurnQuizCard({
           <View style={styles.playerBadge}>
             <View style={[styles.playerDot, { backgroundColor: player.color }]} />
             <ThemedText type="annotation" style={{ color: theme.primary, fontWeight: '800' }}>
-              {player.name.toUpperCase()}'S CHALLENGE
+              {player.name.toUpperCase()}'S TURN
             </ThemedText>
           </View>
           <ThemedText type="smallBold" style={{ color: theme.secondary }}>

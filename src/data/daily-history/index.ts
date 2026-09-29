@@ -12,7 +12,7 @@ export * from './validator';
  */
 export const AAJ_EVENTS: AajKaAkhyanaEvent[] = filterValidAajEvents(RAW_AAJ_EVENTS);
 
-const MONTH_NAMES = [
+export const MONTH_NAMES = [
   'January',
   'February',
   'March',
@@ -25,6 +25,21 @@ const MONTH_NAMES = [
   'October',
   'November',
   'December',
+];
+
+export const MONTH_SHORT_NAMES = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 /**
@@ -75,9 +90,29 @@ export function getEventsForDate(month: number, day: number): AajKaAkhyanaEvent[
 /**
  * Returns all validated events for today's date.
  */
-export function getTodayEvents(): AajKaAkhyanaEvent[] {
+export function getEventsForToday(): AajKaAkhyanaEvent[] {
   const { month, day } = getTodayDate();
   return getEventsForDate(month, day);
+}
+
+/**
+ * Backward-compatible alias for getEventsForToday.
+ */
+export function getTodayEvents(): AajKaAkhyanaEvent[] {
+  return getEventsForToday();
+}
+
+/**
+ * Returns all validated events for a date filtered by category.
+ */
+export function getEventsByCategory(
+  month: number,
+  day: number,
+  category: 'All' | AajCategory
+): AajKaAkhyanaEvent[] {
+  const events = getEventsForDate(month, day);
+  if (category === 'All') return events;
+  return events.filter((e) => e.category === category);
 }
 
 /**
@@ -126,4 +161,43 @@ export function getAllAvailableDates(): {
     if (a.month !== b.month) return a.month - b.month;
     return a.day - b.day;
   });
+}
+
+/**
+ * Alias for getAllAvailableDates.
+ */
+export function getAvailableDates() {
+  return getAllAvailableDates();
+}
+
+/**
+ * Check if any verified events exist for a given calendar date.
+ */
+export function hasEventsOnDate(month: number, day: number): boolean {
+  const key = formatMonthDayKey(month, day);
+  return AAJ_EVENTS.some((e) => e.date === key);
+}
+
+/**
+ * Number of days in a given month.
+ */
+export function getDaysInMonth(month: number, year = 2024): number {
+  return new Date(year, month, 0).getDate();
+}
+
+/**
+ * Returns the adjacent calendar date (+1 day or -1 day), handling month and year boundary rollover.
+ */
+export function getAdjacentDate(
+  month: number,
+  day: number,
+  offsetDays: -1 | 1
+): { month: number; day: number } {
+  // Use a fixed reference leap year to allow Feb 29 navigation
+  const referenceYear = 2024;
+  const targetDate = new Date(referenceYear, month - 1, day + offsetDays);
+  return {
+    month: targetDate.getMonth() + 1,
+    day: targetDate.getDate(),
+  };
 }

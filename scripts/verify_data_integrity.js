@@ -12,7 +12,7 @@ const windowMatches = [...eventsContent.matchAll(/id:\s*'([^']+)',\s*label:/g)].
 console.log(`Found ${windowMatches.length} TIME_WINDOWS`);
 
 // Check if any events reference non-existent window IDs or if any subtopics are missing
-const eventMatches = [...eventsContent.matchAll(/id:\s*'([0-9a-z-]+)',\s*title:/g)].map(m => m[1]);
+const eventMatches = [...eventsContent.matchAll(/id:\s*'([0-9a-z-]+)',\s*timeWindowId:/g)].map(m => m[1]);
 console.log(`Found ${eventMatches.length} HISTORICAL_EVENTS`);
 
 // 2. ChronoSearch puzzles

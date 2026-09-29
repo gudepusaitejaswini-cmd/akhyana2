@@ -36,7 +36,7 @@ export function QuizSummaryCard({
           {isPerfect ? '🎉' : isZero ? '🥀' : '🎯'}
         </ThemedText>
         <ThemedText type="cardTitle" style={{ color: isPerfect ? theme.primary : theme.text }}>
-          {isPerfect ? 'PERFECT ROUND!' : isZero ? 'CHALLENGE COMPLETE' : 'ROUND COMPLETE'}
+          {isPerfect ? 'PERFECT ROUND!' : 'ROUND COMPLETE'}
         </ThemedText>
       </View>
 
@@ -46,7 +46,7 @@ export function QuizSummaryCard({
           {correctCount} / {totalQuestions}
         </ThemedText>
         <ThemedText type="smallBold" style={{ color: theme.primary }}>
-          CORRECT ANSWERS
+          CORRECT
         </ThemedText>
       </View>
 
@@ -54,15 +54,15 @@ export function QuizSummaryCard({
       <View style={[styles.messageBox, { backgroundColor: theme.backgroundElement }]}>
         {isZero ? (
           <ThemedText type="caption" style={{ color: theme.textSecondary, textAlign: 'center', lineHeight: 20 }}>
-            0 / {totalQuestions} Correct — You don't move this turn.{'\n'}Better luck on your next turn!
+            0 / {totalQuestions} Correct — You earned 0 steps this turn.{'\n'}Better luck on your next turn!
           </ThemedText>
         ) : !hasLegalMoves ? (
           <ThemedText type="caption" style={{ color: theme.textSecondary, textAlign: 'center', lineHeight: 20 }}>
-            You earned {correctCount} steps, but you have no legal moves for this distance.{'\n'}Turn passes!
+            You earned {correctCount} {correctCount === 1 ? 'step' : 'steps'}, but you have no legal moves for this distance.{'\n'}Turn passes!
           </ThemedText>
         ) : (
           <ThemedText type="caption" style={{ color: theme.text, textAlign: 'center', lineHeight: 20 }}>
-            Your knowledge earned you <ThemedText type="smallBold" style={{ color: theme.secondary }}>{correctCount} steps</ThemedText> of token movement!
+            You earned <ThemedText type="smallBold" style={{ color: theme.secondary }}>{correctCount} {correctCount === 1 ? 'step' : 'steps'}!</ThemedText>
           </ThemedText>
         )}
       </View>

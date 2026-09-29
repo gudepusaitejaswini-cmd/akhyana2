@@ -11,6 +11,7 @@ import { HeritageEvidencePerspective } from '@/components/heritage-voices/Herita
 import { HeritageSourceList } from '@/components/heritage-voices/HeritageSourceList';
 import { HeritageReportModal } from '@/components/heritage-voices/HeritageReportModal';
 import { Colors } from '@/constants/theme';
+import { recordHeritageVoiceRead } from '@/services/user-progress';
 
 export default function ArticleDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,6 +23,12 @@ export default function ArticleDetailScreen() {
 
   const article = id ? getHeritageArticleById(id) : undefined;
   const author = article ? getHeritageExpertById(article.authorId) : undefined;
+
+  React.useEffect(() => {
+    if (article) {
+      recordHeritageVoiceRead(article.id);
+    }
+  }, [article]);
 
   if (!article) {
     return (

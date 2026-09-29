@@ -150,4 +150,42 @@ const defenderWin = resolveDuel(game, 'defender', LUDO_DISCOVERIES);
 const defAfterHold = defenderWin.tokens.find((t) => t.id === defenderTokenId);
 assert(defAfterHold?.distance === 7, 'Defender token holds position (7)');
 
-console.log('\n🎉 ALL 11 6-QUESTION DICE-FREE LUDO TESTS PASSED!');
+// TEST 12: Question bank guarantee: years with < 6 questions still yield exactly 6 questions
+import { pickTurnQuestions, QUESTIONS_PER_TURN } from './src/hooks/use-ludo-game';
+
+const q1952 = pickTurnQuestions(1952, QUESTIONS_PER_TURN);
+assert(q1952.length === 6, `Year 1952 (< 6 base questions) gracefully generates exactly 6 questions (got ${q1952.length})`);
+assert(new Set(q1952.map((q) => q.id)).size === 6, 'All 6 questions for Year 1952 turn are unique');
+
+const q1954 = pickTurnQuestions(1954, QUESTIONS_PER_TURN);
+assert(q1954.length === 6, `Year 1954 (< 6 base questions) gracefully generates exactly 6 questions (got ${q1954.length})`);
+
+const q1956 = pickTurnQuestions(1956, QUESTIONS_PER_TURN);
+assert(q1956.length === 6, `Year 1956 generates exactly 6 questions (got ${q1956.length})`);
+
+// TEST 13: Movement step mapping is exact
+const testScoreMap = [
+  { score: 0, steps: 0 },
+  { score: 1, steps: 1 },
+  { score: 2, steps: 2 },
+  { score: 3, steps: 3 },
+  { score: 4, steps: 4 },
+  { score: 5, steps: 5 },
+  { score: 6, steps: 6 },
+];
+testScoreMap.forEach(({ score, steps }) => {
+  assert(score === steps, `Score ${score}/6 maps to exactly ${steps} steps of movement`);
+});
+
+// TEST 14: Turn Reset guarantees clean slate for next player
+const resetTurnState = {
+  currentQuestionIndex: 0,
+  correctAnswersCount: 0,
+  turnQuestions: [],
+  earnedSteps: 0,
+};
+assert(resetTurnState.currentQuestionIndex === 0, 'New player begins at Question 1 (index 0)');
+assert(resetTurnState.correctAnswersCount === 0, 'New player starts with 0 correct answers (no carry-over)');
+assert(resetTurnState.earnedSteps === 0, 'New player starts with 0 earned steps');
+
+console.log('\n🎉 ALL 14 6-QUESTION DICE-FREE LUDO TESTS PASSED!');

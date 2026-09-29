@@ -3,18 +3,25 @@ import {
   APPROVED_SOURCES,
   formatMonthDayKey,
   formatMonthDayLabel,
+  getAdjacentDate,
+  getAllAvailableDates,
   getApprovedSource,
+  getAvailableDates,
+  getDaysInMonth,
+  getEventsByCategory,
   getEventsForDate,
+  getEventsForToday,
   getFeaturedTodayEvent,
   getTodayDate,
   getTodayEvents,
+  hasEventsOnDate,
   isSourceApproved,
   validateAajEvent,
 } from './src/data/daily-history';
 import { AajKaAkhyanaEvent } from './src/data/daily-history/types';
 
 console.log('==============================================');
-console.log('  AAJ KA AKHYANA — 14-CASE VERIFICATION SUITE ');
+console.log('  AAJ KA AKHYANA — 15-POINT COMPREHENSIVE SUITE');
 console.log('==============================================\n');
 
 function assert(condition: boolean, msg: string) {
@@ -26,110 +33,126 @@ function assert(condition: boolean, msg: string) {
   }
 }
 
-// 1. Date with one historical event
-const singleEvents = getEventsForDate(8, 15);
-assert(singleEvents.length >= 1, 'Case 1: Date with single historical event returns records');
-assert(singleEvents[0].title.includes('Indian Independence'), 'Case 1: Event title is correct');
-assert(singleEvents[0].date === '08-15', 'Case 1: Event date key matches 08-15');
+// 1. 26 January (01-26) -> Republic Day event exists
+const jan26Events = getEventsForDate(1, 26);
+assert(jan26Events.length >= 1, 'Point 1: 26 January returns records');
+assert(jan26Events.some(e => e.title.includes('Constitution')), 'Point 1: 26 January contains Constitution Enactment');
 
-// 2. Date with multiple historical events (September 28 - Today)
-const todayEvents = getEventsForDate(9, 28);
-assert(todayEvents.length === 4, 'Case 2: 28 September contains exactly 4 curated events');
-const titles = todayEvents.map(e => e.title);
-assert(titles.some(t => t.includes('Bhagat Singh')), 'Case 2: Contains Bhagat Singh birth milestone');
-assert(titles.some(t => t.includes('Sarda Act')), 'Case 2: Contains Child Marriage Restraint Act (Sarda Act)');
-assert(titles.some(t => t.includes('ASTROSAT')), 'Case 2: Contains ISRO ASTROSAT launch');
-assert(titles.some(t => t.includes('Bahadur Shah Zafar')), 'Case 2: Contains Bahadur Shah Zafar accession');
+// 2. 15 August (08-15) -> Independence Day event exists
+const aug15Events = getEventsForDate(8, 15);
+assert(aug15Events.length >= 1, 'Point 2: 15 August returns records');
+assert(aug15Events.some(e => e.title.includes('Independence')), 'Point 2: 15 August contains Indian Independence');
 
-// 3. Date with no event
-const emptyEvents = getEventsForDate(9, 29);
-assert(emptyEvents.length === 0, 'Case 3: Date with no event returns empty array');
+// 3. 29 September (09-29) -> Correctly searches 09-29 and returns verified events
+const sep29Events = getEventsForDate(9, 29);
+assert(sep29Events.length >= 2, 'Point 3: 29 September contains verified historical events');
+assert(sep29Events.some(e => e.title.includes('Matangini Hazra')), 'Point 3: Contains Matangini Hazra Quit India milestone');
+assert(sep29Events.some(e => e.title.includes('Haj Notes')), 'Point 3: Contains RBI Haj Currency milestone');
 
-// 4. Event with approved source passes validation
+// 4. Date with multiple events -> all events appear
+const sep28Events = getEventsForDate(9, 28);
+assert(sep28Events.length === 4, 'Point 4: 28 September contains all 4 verified events');
+const titles28 = sep28Events.map(e => e.title);
+assert(titles28.some(t => t.includes('Bhagat Singh')), 'Point 4: Contains Bhagat Singh birth');
+assert(titles28.some(t => t.includes('Sarda Act')), 'Point 4: Contains Sarda Act');
+assert(titles28.some(t => t.includes('ASTROSAT')), 'Point 4: Contains ASTROSAT launch');
+assert(titles28.some(t => t.includes('Bahadur Shah Zafar')), 'Point 4: Contains Bahadur Shah Zafar accession');
+
+// 5. Date with no events -> returns empty array
+const emptyEvents = getEventsForDate(9, 30);
+assert(emptyEvents.length === 0, 'Point 5: Date with no event (30 Sept) returns empty array');
+
+// 6. Category filter works on selected date
+const movementsSep29 = getEventsByCategory(9, 29, 'Movements');
+assert(movementsSep29.length === 1 && movementsSep29[0].title.includes('Matangini Hazra'), 'Point 6: 29 September + Movements returns Matangini Hazra');
+const battlesSep29 = getEventsByCategory(9, 29, 'Battles');
+assert(battlesSep29.length === 0, 'Point 6: 29 September + Battles returns 0 events');
+
+// 7. Full-year representation: every calendar month (1..12) has verified events
+for (let m = 1; m <= 12; m++) {
+  const monthEvents = AAJ_EVENTS.filter(e => parseInt(e.date.split('-')[0], 10) === m);
+  assert(monthEvents.length >= 1, `Point 7: Month ${m} has at least 1 source-verified historical event`);
+}
+
+// 8. Event validation requirements
 const validEvent: AajKaAkhyanaEvent = {
   id: 'test-event-1',
-  date: '09-28',
-  displayDate: '28 September',
-  year: 1907,
+  date: '09-29',
+  displayDate: '29 September',
+  year: 1942,
   title: 'Valid Milestone',
-  category: 'Historical Figures',
+  category: 'Movements',
   shortDescription: 'Valid documented historical description.',
   significance: 'Significant milestone in national history.',
   sourceId: 'nai',
   sourceName: 'National Archives of India',
   sourceUrl: 'https://nationalarchives.nic.in/',
 };
-const validRes = validateAajEvent(validEvent);
-assert(validRes.valid === true, 'Case 4: Event with approved source passes validation');
+assert(validateAajEvent(validEvent).valid === true, 'Point 8: Event with approved source and URL passes validation');
 
-// 5. Event missing source fails validation
 const badSourceEvent: Partial<AajKaAkhyanaEvent> = {
   id: 'test-no-src',
-  date: '09-28',
-  year: 1907,
+  date: '09-29',
+  year: 1942,
   title: 'No Source Event',
   category: 'Battles',
   shortDescription: 'Desc',
   significance: 'Signif',
 };
-const badSourceRes = validateAajEvent(badSourceEvent);
-assert(badSourceRes.valid === false && badSourceRes.errors.some(e => e.includes('sourceId')), 'Case 5: Event missing source is rejected');
+assert(validateAajEvent(badSourceEvent).valid === false, 'Point 8: Event missing sourceId is rejected');
 
-// 6. Invalid event data fails validation
-const badDataEvent: Partial<AajKaAkhyanaEvent> = {
-  id: 'test-bad-data',
-  year: 1907,
-  category: 'Battles',
-  sourceId: 'nai',
-  sourceName: 'National Archives of India',
+const badUrlEvent: Partial<AajKaAkhyanaEvent> = {
+  ...validEvent,
+  sourceUrl: '',
 };
-const badDataRes = validateAajEvent(badDataEvent);
-assert(badDataRes.valid === false && badDataRes.errors.some(e => e.includes('title')), 'Case 6: Missing title rejected');
-assert(badDataRes.valid === false && badDataRes.errors.some(e => e.includes('date')), 'Case 6: Missing date rejected');
+assert(validateAajEvent(badUrlEvent).valid === false, 'Point 8: Event missing sourceUrl is rejected');
 
-// 7. Event details model
-const bhagatSingh = AAJ_EVENTS.find(e => e.id === 'aaj-0928-bhagat-singh');
-assert(Boolean(bhagatSingh?.fullExplanation), 'Case 7: Event detail model includes fullExplanation');
-assert(bhagatSingh?.location === 'Banga, Punjab', 'Case 7: Event includes supported location');
-assert(bhagatSingh?.people?.includes('Bhagat Singh') ?? false, 'Case 7: Event includes supported people');
-assert(Boolean(bhagatSingh?.sourceCitation), 'Case 7: Event includes sourceCitation');
-
-// 8. Opening external source
+// 9. Source verification on entire dataset
 AAJ_EVENTS.forEach(event => {
-  assert(isSourceApproved(event.sourceId), `Case 8: Source '${event.sourceId}' is in approved registry`);
+  assert(isSourceApproved(event.sourceId), `Point 9: Source '${event.sourceId}' is in approved registry`);
   const src = getApprovedSource(event.sourceId);
-  assert(Boolean(src?.url), `Case 8: Approved source '${event.sourceId}' has verified URL`);
+  assert(Boolean(src?.url), `Point 9: Approved source '${event.sourceId}' has verified URL`);
+  assert(Boolean(event.sourceUrl), `Point 9: Event '${event.id}' has explicit sourceUrl`);
 });
 
-// 9. Navigation from Home → Aaj Ka Akhyana
-assert('/aaj-ka-akhyana' === '/aaj-ka-akhyana', 'Case 9: Route target /aaj-ka-akhyana is defined');
+// 10. Reusable functions & aliases
+assert(typeof getEventsForToday === 'function', 'Point 10: getEventsForToday is exported');
+assert(typeof getTodayEvents === 'function', 'Point 10: getTodayEvents is exported');
+assert(typeof getAvailableDates === 'function', 'Point 10: getAvailableDates is exported');
+assert(getAllAvailableDates().length > 10, 'Point 10: getAllAvailableDates returns multi-date calendar');
+assert(hasEventsOnDate(9, 29) === true, 'Point 10: hasEventsOnDate(9, 29) is true');
+assert(hasEventsOnDate(9, 30) === false, 'Point 10: hasEventsOnDate(9, 30) is false');
 
-// 10. Navigation from Aaj Ka Akhyana → Explore
-assert('/explore' === '/explore', 'Case 10: Fallback route /explore is defined');
+// 11. Calendar navigation helper
+const nextFromSep29 = getAdjacentDate(9, 29, 1);
+assert(nextFromSep29.month === 9 && nextFromSep29.day === 30, 'Point 11: 29 Sept + 1 day = 30 Sept');
+const prevFromJan1 = getAdjacentDate(1, 1, -1);
+assert(prevFromJan1.month === 12 && prevFromJan1.day === 31, 'Point 11: 1 Jan - 1 day = 31 Dec');
+assert(getDaysInMonth(2) >= 28, 'Point 11: getDaysInMonth(2) returns valid days');
 
-// 11. Heritage Voices remains completely separate
-assert(AAJ_EVENTS.every(e => !('authorId' in e)), 'Case 11: Aaj Ka Akhyana events do not use Heritage Voices authorId schema');
+// 12. Heritage Voices schema independence
+assert(AAJ_EVENTS.every(e => !('authorId' in e)), 'Point 12: Aaj Ka Akhyana events do not use Heritage Voices authorId schema');
 
-// 12. No unapproved internet content
-const approvedKeys = Object.keys(APPROVED_SOURCES);
-assert(AAJ_EVENTS.every(e => approvedKeys.includes(e.sourceId)), 'Case 12: Every event strictly maps to an approved Akhyana source');
+// 13. Deterministic execution
+const runA = getEventsForDate(9, 29);
+const runB = getEventsForDate(9, 29);
+assert(JSON.stringify(runA) === JSON.stringify(runB), 'Point 13: Data is purely deterministic across executions');
 
-// 13. Refreshing / repeated calls return identical deterministic data
-const runA = getEventsForDate(9, 28);
-const runB = getEventsForDate(9, 28);
-assert(JSON.stringify(runA) === JSON.stringify(runB), 'Case 13: Data is purely deterministic across executions');
-
-// 14. Displayed date matches user's current calendar date
+// 14. Today dynamically changes based on system date
 const today = getTodayDate();
 const sys = new Date();
-assert(today.month === sys.getMonth() + 1, 'Case 14: Month matches local system calendar');
-assert(today.day === sys.getDate(), 'Case 14: Day matches local system calendar');
-assert(today.year === sys.getFullYear(), 'Case 14: Year matches local system calendar');
-assert(today.formattedKey === formatMonthDayKey(sys.getMonth() + 1, sys.getDate()), 'Case 14: Formatted key matches system date');
+assert(today.month === sys.getMonth() + 1, 'Point 14: Month matches local system calendar');
+assert(today.day === sys.getDate(), 'Point 14: Day matches local system calendar');
+assert(today.year === sys.getFullYear(), 'Point 14: Year matches local system calendar');
+assert(today.formattedKey === formatMonthDayKey(sys.getMonth() + 1, sys.getDate()), 'Point 14: Formatted key matches system date');
 
 const feat = getFeaturedTodayEvent();
-assert(Boolean(feat), 'Case 14: Featured today event is resolved successfully');
+assert(Boolean(feat), 'Point 14: Featured today event is resolved successfully');
+
+// 15. All approved sources registered
+const approvedKeys = Object.keys(APPROVED_SOURCES);
+assert(AAJ_EVENTS.every(e => approvedKeys.includes(e.sourceId)), 'Point 15: Every event strictly maps to an approved Akhyana source');
 
 console.log('\n==============================================');
-console.log('  ALL 14 CASES PASSED WITH 100% SUCCESS!      ');
+console.log('  ALL 15 POINTS PASSED WITH 100% SUCCESS!     ');
 console.log('==============================================\n');

@@ -4,9 +4,11 @@ import {
   pickRetryDuelQuestion,
   pickYearDuelQuestion,
   shuffleYearQuestionChoices,
+  YEAR_DUEL_QUESTIONS,
   YearDuelQuestion,
 } from '@/data/year-duel-questions';
 import { addCompletedYear } from '@/utils/completed-years';
+import { recordQuestionAnswer } from '@/services/user-progress';
 import {
   applyTokenMove,
   attachQuestion,
@@ -59,30 +61,80 @@ function toDuelPresentation(question: YearDuelQuestion): LudoDuelQuestion {
   };
 }
 
+export const QUESTIONS_PER_TURN = 6;
+
 /**
  * Pick `count` distinct historical questions for a turn.
- * Ensures no duplicates within the turn.
+ * Ensures no duplicates within the turn and GUARANTEES exactly `count` (6)
+ * questions even if a specific calendar year has fewer than 6 base entries
+ * by supplementing gracefully from the historical question bank.
  */
-function pickTurnQuestions(
+export function pickTurnQuestions(
   year: number,
-  count: number,
-  usedIds: string[],
+  count: number = QUESTIONS_PER_TURN,
+  usedIds: string[] = [],
 ): LudoDuelQuestion[] {
-  const allQuestions = getQuestionsForYear(year);
-  if (allQuestions.length === 0) return [];
+  const chosenYearQuestions = getQuestionsForYear(year);
+  const picked: YearDuelQuestion[] = [];
 
-  let candidates = allQuestions.filter((q) => !usedIds.includes(q.id));
-  if (candidates.length < count) {
-    candidates = [...allQuestions];
+  // 1. First priority: Unused questions for the exact year selected
+  const unusedFromYear = chosenYearQuestions.filter((q) => !usedIds.includes(q.id));
+  const shuffledUnusedYear = [...unusedFromYear].sort(() => Math.random() - 0.5);
+  picked.push(...shuffledUnusedYear.slice(0, count));
+
+  // 2. Second priority: If more needed, take other questions from the same year
+  if (picked.length < count && chosenYearQuestions.length > 0) {
+    const remainingYearPool = chosenYearQuestions.filter((q) => !picked.some((p) => p.id === q.id));
+    const shuffledRemaining = [...remainingYearPool].sort(() => Math.random() - 0.5);
+    picked.push(...shuffledRemaining.slice(0, count - picked.length));
   }
 
-  const shuffled = [...candidates].sort(() => Math.random() - 0.5);
-  const picked = shuffled.slice(0, count);
+  // 3. Third priority: If selected year has fewer than 6 questions, supplement from the same decade/era
+  if (picked.length < count) {
+    const decadeStart = Math.floor(year / 10) * 10;
+    const decadeEnd = decadeStart + 9;
+    const decadeQuestions = YEAR_DUEL_QUESTIONS.filter(
+      (q) => q.year >= decadeStart && q.year <= decadeEnd && !picked.some((p) => p.id === q.id),
+    );
 
-  return picked.map((q) => toDuelPresentation(q));
+    // Unused in decade first
+    const unusedDecade = decadeQuestions.filter((q) => !usedIds.includes(q.id));
+    const shuffledUnusedDecade = [...unusedDecade].sort(() => Math.random() - 0.5);
+    picked.push(...shuffledUnusedDecade.slice(0, count - picked.length));
+
+    // Then any in decade
+    if (picked.length < count) {
+      const remainingDecade = decadeQuestions.filter((q) => !picked.some((p) => p.id === q.id));
+      const shuffledRemainingDecade = [...remainingDecade].sort(() => Math.random() - 0.5);
+      picked.push(...shuffledRemainingDecade.slice(0, count - picked.length));
+    }
+  }
+
+  // 4. Fourth priority: If still under count, supplement from general YEAR_DUEL_QUESTIONS pool
+  if (picked.length < count) {
+    const otherQuestions = YEAR_DUEL_QUESTIONS.filter((q) => !picked.some((p) => p.id === q.id));
+    const unusedOther = otherQuestions.filter((q) => !usedIds.includes(q.id));
+    const shuffledUnusedOther = [...unusedOther].sort(() => Math.random() - 0.5);
+    picked.push(...shuffledUnusedOther.slice(0, count - picked.length));
+
+    if (picked.length < count) {
+      const remainingOther = otherQuestions.filter((q) => !picked.some((p) => p.id === q.id));
+      const shuffledRemainingOther = [...remainingOther].sort(() => Math.random() - 0.5);
+      picked.push(...shuffledRemainingOther.slice(0, count - picked.length));
+    }
+  }
+
+  // 5. Final fallback (cycle if question bank is exhausted)
+  if (picked.length < count && picked.length > 0) {
+    let index = 0;
+    while (picked.length < count) {
+      picked.push(picked[index % picked.length]);
+      index++;
+    }
+  }
+
+  return picked.slice(0, count).map((q) => toDuelPresentation(q));
 }
-
-export const QUESTIONS_PER_TURN = 6;
 
 export function useLudoGame(players: LudoPlayerConfig[]) {
   const [state, setState] = useState<LudoGameState>(() => createLudoGame(players));
@@ -191,6 +243,15 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
     const nextCorrect = isCorrect ? correctAnswersCount + 1 : correctAnswersCount;
     setCorrectAnswersCount(nextCorrect);
 
+    // Record learning signal in Akhyana Progress & Mastery system
+    recordQuestionAnswer({
+      questionId: currentQ.id,
+      isCorrect,
+      year: quizYear,
+      promptOrText: currentQ.question,
+      theme: currentQ.era,
+    });
+
     setState((cur) => ({
       ...cur,
       correctAnswersCount: nextCorrect,
@@ -201,7 +262,7 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
   const nextQuestion = useCallback(() => {
     if (!isAnswerSubmitted) return;
 
-    if (currentQuestionIndex + 1 < turnQuestions.length) {
+    if (currentQuestionIndex + 1 < QUESTIONS_PER_TURN && currentQuestionIndex + 1 < turnQuestions.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedChoice(null);
       setIsAnswerSubmitted(false);
@@ -235,7 +296,7 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
       playerName: curPlayer.name,
       playerColor: curPlayer.color,
       correctCount: cur.correctAnswersCount,
-      totalQuestions: cur.turnQuestions.length || QUESTIONS_PER_TURN,
+      totalQuestions: QUESTIONS_PER_TURN,
       spacesMoved,
       nextSeat: next,
       nextPlayerName: nextPlayer.name,
@@ -403,6 +464,16 @@ export function useLudoGame(players: LudoPlayerConfig[]) {
         ? '✕ Incorrect. Defence holds. Opponent survives.'
         : '⏱ Time expired! Opponent holds position.',
     );
+
+    if (presentedRef.current && (outcome === 'attacker' || outcome === 'defender')) {
+      recordQuestionAnswer({
+        questionId: presentedRef.current.id,
+        isCorrect: outcome === 'attacker',
+        year: quizYear,
+        promptOrText: presentedRef.current.prompt,
+        theme: presentedRef.current.theme,
+      });
+    }
 
     if (finishTimerRef.current) clearTimeout(finishTimerRef.current);
     finishTimerRef.current = setTimeout(() => {

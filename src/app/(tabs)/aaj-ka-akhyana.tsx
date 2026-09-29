@@ -14,13 +14,17 @@ import {
   AajCategory,
   AajKaAkhyanaEvent,
   formatMonthDayLabel,
+  getAdjacentDate,
   getAllAvailableDates,
   getEventsForDate,
   getTodayDate,
+  MONTH_SHORT_NAMES,
 } from '@/data/daily-history';
+import { AajDatePickerModal } from '@/components/daily-history/aaj-date-picker-modal';
 import { AajEventCard, CATEGORY_ICONS } from '@/components/daily-history/aaj-event-card';
 import { AajEventModal } from '@/components/daily-history/aaj-event-modal';
 import { useTheme } from '@/hooks/use-theme';
+import { recordAajKaAkhyanaEventViewed } from '@/services/user-progress';
 
 const ALL_CATEGORIES: ('All' | AajCategory)[] = [
   'All',
@@ -45,8 +49,9 @@ export default function AajKaAkhyanaScreen() {
   const [selectedDay, setSelectedDay] = useState<number>(today.day);
   const [selectedCategory, setSelectedCategory] = useState<'All' | AajCategory>('All');
   const [activeModalEvent, setActiveModalEvent] = useState<AajKaAkhyanaEvent | null>(null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
 
-  // Available dates for quick switching
+  // Available dates for quick switching (dynamically derived from dataset)
   const availableDates = useMemo(() => getAllAvailableDates(), []);
 
   // Events for selected date
@@ -72,11 +77,9 @@ export default function AajKaAkhyanaScreen() {
     setSelectedCategory('All');
   };
 
-  const handleTestEmptyDate = () => {
-    // 29 September currently has 0 events in the curated database
-    setSelectedMonth(9);
-    setSelectedDay(29);
-    setSelectedCategory('All');
+  const handleStepDay = (offset: -1 | 1) => {
+    const adjacent = getAdjacentDate(selectedMonth, selectedDay, offset);
+    handleSelectDate(adjacent.month, adjacent.day);
   };
 
   return (
@@ -117,29 +120,41 @@ export default function AajKaAkhyanaScreen() {
 
           <HairlineDivider verticalMargin="md" />
 
-          {/* Date Selector Row */}
+          {/* Calendar Navigation Bar */}
           <View style={styles.dateSelectorContainer}>
             <View style={styles.dateSelectorHeader}>
               <ThemedText type="annotation" themeColor="textMuted">
-                SELECT DATE
+                CALENDAR NAVIGATION
               </ThemedText>
               {!isTodaySelected ? (
                 <Pressable
                   onPress={() => handleSelectDate(today.month, today.day)}
-                  style={styles.todayBtn}>
+                  style={styles.todayQuickJumpBtn}>
                   <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '800' }}>
-                    ↩ Jump to Today ({today.day} Sept)
+                    ↩ Jump to Today ({today.day} {MONTH_SHORT_NAMES[today.month - 1]})
                   </ThemedText>
                 </Pressable>
               ) : null}
             </View>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateChipsRow}>
-              {/* Today Chip */}
+            {/* Stepper & Calendar Modal Trigger */}
+            <View style={styles.navControlsRow}>
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Navigate to previous day"
+                onPress={() => handleStepDay(-1)}
+                style={[styles.stepBtn, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
+                <ThemedText style={{ fontSize: 13, color: theme.text, fontWeight: '700' }}>
+                  ← Prev Day
+                </ThemedText>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Navigate to today"
                 onPress={() => handleSelectDate(today.month, today.day)}
                 style={[
-                  styles.dateChip,
+                  styles.todayStepBtn,
                   {
                     backgroundColor: isTodaySelected ? theme.primary : theme.card,
                     borderColor: isTodaySelected ? theme.primary : theme.cardBorder,
@@ -147,16 +162,41 @@ export default function AajKaAkhyanaScreen() {
                 ]}>
                 <ThemedText
                   type="smallBold"
-                  style={{ color: isTodaySelected ? '#FFFFFF' : theme.text }}>
-                  ⭐️ Today ({today.day} Sept)
+                  style={{ color: isTodaySelected ? '#FFFFFF' : theme.text, fontSize: 13 }}>
+                  ⭐️ Today ({today.day} {MONTH_SHORT_NAMES[today.month - 1]})
                 </ThemedText>
               </Pressable>
 
-              {/* Other Curated Landmark Dates */}
-              {availableDates
-                .filter((d) => !(d.month === today.month && d.day === today.day))
-                .map((d) => {
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Navigate to next day"
+                onPress={() => handleStepDay(1)}
+                style={[styles.stepBtn, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
+                <ThemedText style={{ fontSize: 13, color: theme.text, fontWeight: '700' }}>
+                  Next Day →
+                </ThemedText>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Open calendar date picker"
+                onPress={() => setIsDatePickerOpen(true)}
+                style={[styles.calendarPickerBtn, { backgroundColor: theme.backgroundElement, borderColor: theme.secondary }]}>
+                <ThemedText style={{ fontSize: 13, color: theme.secondary, fontWeight: '800' }}>
+                  📅 Select Date
+                </ThemedText>
+              </Pressable>
+            </View>
+
+            {/* Curated Dates Horizontal Chips */}
+            <View style={{ marginTop: Spacing.two }}>
+              <ThemedText type="annotation" themeColor="textMuted" style={{ marginBottom: 4 }}>
+                CURATED MILESTONE DATES ACROSS THE YEAR
+              </ThemedText>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateChipsRow}>
+                {availableDates.map((d) => {
                   const isSelected = selectedMonth === d.month && selectedDay === d.day;
+                  const isTodayChip = d.month === today.month && d.day === today.day;
                   return (
                     <Pressable
                       key={d.formattedKey}
@@ -170,39 +210,36 @@ export default function AajKaAkhyanaScreen() {
                       ]}>
                       <ThemedText
                         type="smallBold"
-                        style={{ color: isSelected ? '#FFFFFF' : theme.text }}>
-                        {d.displayString} ({d.count})
+                        style={{
+                          color: isSelected ? '#FFFFFF' : theme.text,
+                          fontSize: 12,
+                        }}>
+                        {isTodayChip ? '⭐️ ' : ''}{d.displayString} ({d.count})
                       </ThemedText>
                     </Pressable>
                   );
                 })}
-
-              {/* Date with 0 events button (for testing empty state) */}
-              <Pressable
-                onPress={handleTestEmptyDate}
-                style={[
-                  styles.dateChip,
-                  {
-                    backgroundColor: selectedMonth === 9 && selectedDay === 29 ? theme.primary : theme.backgroundElement,
-                    borderColor: theme.cardBorder,
-                  },
-                ]}>
-                <ThemedText
-                  type="smallBold"
-                  style={{ color: selectedMonth === 9 && selectedDay === 29 ? '#FFFFFF' : theme.textMuted }}>
-                  Test Empty Date (29 Sept)
-                </ThemedText>
-              </Pressable>
-            </ScrollView>
+              </ScrollView>
+            </View>
           </View>
 
           <HairlineDivider verticalMargin="md" />
 
           {/* Category Filter Pills */}
           <View style={styles.categoryFilterContainer}>
-            <ThemedText type="annotation" themeColor="textMuted">
-              FILTER BY CATEGORY
-            </ThemedText>
+            <View style={styles.categoryHeaderRow}>
+              <ThemedText type="annotation" themeColor="textMuted">
+                FILTER BY CATEGORY
+              </ThemedText>
+              {selectedCategory !== 'All' ? (
+                <Pressable onPress={() => setSelectedCategory('All')}>
+                  <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '700' }}>
+                    Reset Filter (Show All)
+                  </ThemedText>
+                </Pressable>
+              ) : null}
+            </View>
+
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryChipsRow}>
               {ALL_CATEGORIES.map((cat) => {
                 const isSelected = selectedCategory === cat;
@@ -244,8 +281,8 @@ export default function AajKaAkhyanaScreen() {
               </ThemedText>
             </View>
 
-            {filteredEvents.length === 0 ? (
-              /* NO EVENTS AVAILABLE EMPTY STATE */
+            {eventsForSelectedDate.length === 0 ? (
+              /* DATE-AWARE EMPTY STATE FOR UNPOPULATED DATES */
               <View
                 style={[
                   styles.emptyStateContainer,
@@ -254,29 +291,66 @@ export default function AajKaAkhyanaScreen() {
                     borderColor: theme.cardBorder,
                   },
                 ]}>
-                <ThemedText style={{ fontSize: 32, marginBottom: Spacing.two }}>📜</ThemedText>
+                <ThemedText style={{ fontSize: 36, marginBottom: Spacing.two }}>📜</ThemedText>
                 <ThemedText type="editorialHeader" style={{ color: theme.primary, textAlign: 'center' }}>
-                  Nothing has been added for this date yet.
+                  No verified events have been added for {formatMonthDayLabel(selectedMonth, selectedDay)} yet.
                 </ThemedText>
                 <ThemedText type="editorialLead" themeColor="textSecondary" style={styles.emptyLead}>
-                  Akhyana’s historical collection is growing. Check back tomorrow.
+                  Akhyana’s historical collection is growing.
                 </ThemedText>
                 <ThemedText type="caption" themeColor="textMuted" style={{ textAlign: 'center', marginBottom: Spacing.two }}>
                   All entries must meet strict source-verification guidelines before inclusion.
                 </ThemedText>
+                <View style={styles.emptyActionButtonsRow}>
+                  <Button
+                    title="Explore History Instead →"
+                    size="md"
+                    variant="action"
+                    onPress={() => router.push('/explore')}
+                  />
+                  <Pressable
+                    onPress={() => setIsDatePickerOpen(true)}
+                    style={[styles.chooseAnotherBtn, { borderColor: theme.cardBorder }]}>
+                    <ThemedText type="smallBold" style={{ color: theme.secondary }}>
+                      📅 Browse Other Dates
+                    </ThemedText>
+                  </Pressable>
+                </View>
+              </View>
+            ) : filteredEvents.length === 0 ? (
+              /* CATEGORY FILTER EMPTY STATE (Events exist on this date, but not in this category) */
+              <View
+                style={[
+                  styles.emptyStateContainer,
+                  {
+                    backgroundColor: theme.card,
+                    borderColor: theme.cardBorder,
+                  },
+                ]}>
+                <ThemedText style={{ fontSize: 32, marginBottom: Spacing.two }}>🔍</ThemedText>
+                <ThemedText type="editorialHeader" style={{ color: theme.primary, textAlign: 'center' }}>
+                  No {selectedCategory} events found for {formatMonthDayLabel(selectedMonth, selectedDay)}.
+                </ThemedText>
+                <ThemedText type="caption" themeColor="textMuted" style={{ textAlign: 'center', marginBottom: Spacing.two }}>
+                  {eventsForSelectedDate.length} {eventsForSelectedDate.length === 1 ? 'other milestone exists' : 'other milestones exist'} on this day in other categories.
+                </ThemedText>
                 <Button
-                  title="Explore History Instead →"
+                  title="Show All Events on This Day"
                   size="md"
                   variant="action"
-                  onPress={() => router.push('/explore')}
+                  onPress={() => setSelectedCategory('All')}
                 />
               </View>
             ) : (
+              /* POPULATED EVENTS LIST */
               filteredEvents.map((event) => (
                 <AajEventCard
                   key={event.id}
                   event={event}
-                  onReadMore={(e) => setActiveModalEvent(e)}
+                  onReadMore={(e) => {
+                    setActiveModalEvent(e);
+                    recordAajKaAkhyanaEventViewed(e.id);
+                  }}
                   onExploreInternal={(route) => router.push(route as any)}
                 />
               ))
@@ -284,6 +358,15 @@ export default function AajKaAkhyanaScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Calendar Date Picker Modal */}
+      <AajDatePickerModal
+        visible={isDatePickerOpen}
+        selectedMonth={selectedMonth}
+        selectedDay={selectedDay}
+        onSelectDate={handleSelectDate}
+        onClose={() => setIsDatePickerOpen(false)}
+      />
 
       {/* Detail Modal */}
       <AajEventModal
@@ -336,9 +419,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  todayBtn: {
+  todayQuickJumpBtn: {
     paddingVertical: 2,
     paddingHorizontal: Spacing.two,
+  },
+  navControlsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  stepBtn: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  todayStepBtn: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+  },
+  calendarPickerBtn: {
+    paddingHorizontal: Spacing.three,
+    paddingVertical: 8,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
   },
   dateChipsRow: {
     flexDirection: 'row',
@@ -354,6 +462,11 @@ const styles = StyleSheet.create({
   categoryFilterContainer: {
     paddingHorizontal: Spacing.four,
     gap: Spacing.two,
+  },
+  categoryHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   categoryChipsRow: {
     flexDirection: 'row',
@@ -391,5 +504,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 420,
     marginTop: 4,
+  },
+  emptyActionButtonsRow: {
+    flexDirection: 'row',
+    gap: Spacing.three,
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: Spacing.two,
+  },
+  chooseAnotherBtn: {
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
   },
 });

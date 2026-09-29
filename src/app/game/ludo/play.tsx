@@ -136,6 +136,7 @@ function LudoPlay({ players }: { players: NonNullable<ReturnType<typeof getLudoS
                     questions={game.turnQuestions}
                     currentIndex={game.currentQuestionIndex}
                     correctCount={game.correctAnswersCount}
+                    totalQuestions={game.questionsPerTurn}
                     selectedChoice={game.selectedChoice}
                     isSubmitted={game.isAnswerSubmitted}
                     onSelectChoice={game.selectChoice}
@@ -163,7 +164,7 @@ function LudoPlay({ players }: { players: NonNullable<ReturnType<typeof getLudoS
                       <ThemedText style={{ fontSize: 20 }}>🏃</ThemedText>
                       <View>
                         <ThemedText type="smallBold" style={{ color: theme.primary }}>
-                          MOVE YOUR TOKEN ({state.earnedSteps || state.diceValue} STEPS)
+                          MOVE YOUR TOKEN ({state.earnedSteps} {state.earnedSteps === 1 ? 'STEP' : 'STEPS'})
                         </ThemedText>
                         <ThemedText type="caption" style={{ color: theme.textSecondary }}>
                           Tap any highlighted token on the board to move it forward.

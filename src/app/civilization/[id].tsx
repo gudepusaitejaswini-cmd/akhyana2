@@ -15,6 +15,7 @@ import { CIVILIZATIONS } from '@/data/civilizations';
 import { TOPICS } from '@/data/topics';
 import { useTheme } from '@/hooks/use-theme';
 import { useActiveCivilization } from '@/hooks/use-active-civilization';
+import { recordCivilizationExplored } from '@/services/user-progress';
 
 export default function CivilizationDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -24,6 +25,13 @@ export default function CivilizationDetailScreen() {
   const { setActiveCivilizationId } = useActiveCivilization();
 
   const civilization = CIVILIZATIONS.find((c) => c.id === id);
+
+  React.useEffect(() => {
+    if (civilization) {
+      recordCivilizationExplored(civilization.id);
+    }
+  }, [civilization]);
+
   if (!civilization) return <NotFoundState />;
   const civilizationTopics = TOPICS.filter((t) => t.civilizationId === civilization.id);
 

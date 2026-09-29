@@ -1,0 +1,13 @@
+{
+  "framework": null,
+  "installCommand": "cd .. && npm install",
+  "buildCommand": "node build-expo.js",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

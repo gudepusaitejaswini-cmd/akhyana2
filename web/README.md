@@ -4,12 +4,13 @@ This is the official public-facing website for the Akhyana learning platform, bu
 
 ## Vercel Deployment
 
-This website is configured to deploy directly to Vercel:
+This project deploys the full interactive Akhyana Expo Web application to Vercel:
 
-1. Import this repository into Vercel.
-2. In the **Root Directory** setting, type `web`.
-3. The framework preset will automatically detect **Next.js**.
-4. Click **Deploy**.
+- **Root Directory**: Both `./` (repository root, recommended) and `web` are fully supported.
+- **Build Command**: `npx expo export --platform web` (or `npm run build`)
+- **Output Directory**: `dist`
+- **Framework Preset**: Other / None (`framework: null`)
+
 
 ## Local Development
 

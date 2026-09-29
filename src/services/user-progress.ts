@@ -44,13 +44,14 @@ export interface TopicMasteryRecord {
 }
 
 export interface ExplorationRecord {
-  civilizations: string[]; // unique civilization IDs
-  artifacts: string[]; // unique artifact IDs
-  exhibitsViewed: string[]; // unique experience IDs
+  civilizations: string[]; // unique civilization IDs (legacy)
+  artifacts: string[]; // unique artifact IDs (legacy)
+  exhibitsViewed: string[]; // unique experience IDs (legacy)
   timelineEventsViewed: string[]; // unique timeline event IDs
   heritageVoicesRead: string[]; // unique article IDs
   aajKaAkhyanaViewed: string[]; // unique event IDs
   periodsExplored: string[]; // unique period/decade IDs (e.g. '1950s', 'indus-valley-period')
+  learnSubtopicsViewed?: string[]; // unique learn subtopic IDs
 }
 
 export interface AchievementRecord {
@@ -132,6 +133,7 @@ export function createInitialProgress(): UserProgressData {
       heritageVoicesRead: [],
       aajKaAkhyanaViewed: [],
       periodsExplored: [],
+      learnSubtopicsViewed: [],
     },
     activeDays: [todayStr],
     recentQuestionIds: [],
@@ -576,6 +578,29 @@ export function recordPeriodExplored(periodId: string): void {
     exploration: {
       ...current.exploration,
       periodsExplored: [...current.exploration.periodsExplored, periodId],
+    },
+    lastActiveAt: new Date().toISOString(),
+  };
+
+  evaluateAchievements(updated);
+  saveUserProgress(updated);
+}
+
+/**
+ * Record viewing an event subtopic in Learn.
+ * EXPLORATION ONLY — DOES NOT increase mastery!
+ */
+export function recordLearnSubtopicViewed(subtopicId: string): void {
+  if (!subtopicId) return;
+  const current = getUserProgress();
+  const existing = current.exploration.learnSubtopicsViewed || [];
+  if (existing.includes(subtopicId)) return;
+
+  const updated: UserProgressData = {
+    ...current,
+    exploration: {
+      ...current.exploration,
+      learnSubtopicsViewed: [...existing, subtopicId],
     },
     lastActiveAt: new Date().toISOString(),
   };

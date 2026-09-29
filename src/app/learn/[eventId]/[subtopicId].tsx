@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BorderRadius, BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { getEventById } from '@/data/historical-events';
 import { useTheme } from '@/hooks/use-theme';
+import { recordLearnSubtopicViewed } from '@/services/user-progress';
 
 export default function SubtopicLearningScreen() {
   const { eventId, subtopicId } = useLocalSearchParams<{ eventId: string; subtopicId: string }>();
@@ -19,6 +21,13 @@ export default function SubtopicLearningScreen() {
   const event = getEventById(eventId);
   const index = event?.subtopics.findIndex((item) => item.id === subtopicId) ?? -1;
   const subtopic = index >= 0 ? event?.subtopics[index] : undefined;
+
+  useEffect(() => {
+    if (subtopic?.id) {
+      recordLearnSubtopicViewed(subtopic.id);
+    }
+  }, [subtopic?.id]);
+
   if (!event || !subtopic) return <NotFoundState />;
   const next = event.subtopics[index + 1];
 

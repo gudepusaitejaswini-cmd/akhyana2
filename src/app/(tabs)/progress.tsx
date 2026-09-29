@@ -11,9 +11,6 @@ import { ProgressBar } from '@/components/progress-bar';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BorderRadius, BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { CIVILIZATIONS } from '@/data/civilizations';
-import { ARTIFACTS } from '@/data/artifacts';
-import { EXPERIENCES } from '@/data/experiences';
 import { useTheme } from '@/hooks/use-theme';
 import {
   getAchievementsDefinitions,
@@ -44,16 +41,9 @@ export default function ProgressScreen() {
   const { masteredCount: topicsMasteredCount, totalTopics } = getMasteredTopicsCount(progress);
 
   // Exploration Stats
-  const exploredCivCount = progress.exploration.civilizations.length;
-  const totalCivCount = CIVILIZATIONS.length; // 7
-
-  const discoveredArtifactsCount = progress.exploration.artifacts.length;
-  const totalArtifactsCount = ARTIFACTS.length; // 4
-
-  const viewedExhibitsCount = progress.exploration.exhibitsViewed.length;
-  const totalExhibitsCount = EXPERIENCES.length; // 4
-
+  const periodsExploredCount = progress.exploration.periodsExplored.length;
   const timelineEventsCount = progress.exploration.timelineEventsViewed.length;
+  const learnSubtopicsCount = progress.exploration.learnSubtopicsViewed?.length || 0;
   const heritageVoicesCount = progress.exploration.heritageVoicesRead.length;
   const aajKaAkhyanaCount = progress.exploration.aajKaAkhyanaViewed.length;
 
@@ -66,7 +56,13 @@ export default function ProgressScreen() {
   // Achievements
   const achievements = getAchievementsDefinitions(progress);
 
-  const isBrandNewUser = questionsAnswered === 0 && exploredCivCount === 0 && viewedExhibitsCount === 0;
+  const isBrandNewUser =
+    questionsAnswered === 0 &&
+    periodsExploredCount === 0 &&
+    timelineEventsCount === 0 &&
+    learnSubtopicsCount === 0 &&
+    heritageVoicesCount === 0 &&
+    aajKaAkhyanaCount === 0;
 
   return (
     <ThemedView style={styles.screen}>
@@ -295,71 +291,11 @@ export default function ProgressScreen() {
               <AnnotationTag label="DISCOVERED" variant="discovery" />
             </View>
             <ThemedText type="small" themeColor="textSecondary">
-              Authentic milestones, sources, and exhibits uncovered in your Akhyana archive.
+              Authentic milestones, sources, and historical content uncovered in your Akhyana archive.
             </ThemedText>
 
             <View style={styles.explorationGrid}>
-              {/* 1. Civilizations */}
-              <Pressable
-                onPress={() => router.push('/explore')}
-                style={({ pressed }) => [
-                  styles.explorationCard,
-                  { backgroundColor: theme.card, borderColor: theme.cardBorder },
-                  pressed && styles.pressed,
-                ]}>
-                <ThemedText style={{ fontSize: 26 }}>🏛️</ThemedText>
-                <ThemedText type="caption" themeColor="textMuted">
-                  CIVILIZATIONS
-                </ThemedText>
-                <ThemedText type="editorialHeader" style={{ color: theme.primary }}>
-                  {exploredCivCount} / {totalCivCount}
-                </ThemedText>
-                <ThemedText type="caption" themeColor="textSecondary">
-                  Documented Cultures
-                </ThemedText>
-              </Pressable>
-
-              {/* 2. Artifacts */}
-              <Pressable
-                onPress={() => router.push('/civilization/indus-valley')}
-                style={({ pressed }) => [
-                  styles.explorationCard,
-                  { backgroundColor: theme.card, borderColor: theme.cardBorder },
-                  pressed && styles.pressed,
-                ]}>
-                <ThemedText style={{ fontSize: 26 }}>🏺</ThemedText>
-                <ThemedText type="caption" themeColor="textMuted">
-                  ARTIFACTS
-                </ThemedText>
-                <ThemedText type="editorialHeader" style={{ color: theme.primary }}>
-                  {discoveredArtifactsCount} / {totalArtifactsCount}
-                </ThemedText>
-                <ThemedText type="caption" themeColor="textSecondary">
-                  Discovered Relics
-                </ThemedText>
-              </Pressable>
-
-              {/* 3. Exhibits Viewed */}
-              <Pressable
-                onPress={() => router.push('/learn')}
-                style={({ pressed }) => [
-                  styles.explorationCard,
-                  { backgroundColor: theme.card, borderColor: theme.cardBorder },
-                  pressed && styles.pressed,
-                ]}>
-                <ThemedText style={{ fontSize: 26 }}>📜</ThemedText>
-                <ThemedText type="caption" themeColor="textMuted">
-                  EXHIBITS VIEWED
-                </ThemedText>
-                <ThemedText type="editorialHeader" style={{ color: theme.primary }}>
-                  {viewedExhibitsCount} / {totalExhibitsCount}
-                </ThemedText>
-                <ThemedText type="caption" themeColor="textSecondary">
-                  Learning Modules
-                </ThemedText>
-              </Pressable>
-
-              {/* 4. Timeline Events */}
+              {/* 1. Timeline Decades */}
               <Pressable
                 onPress={() => router.push('/explore')}
                 style={({ pressed }) => [
@@ -369,17 +305,57 @@ export default function ProgressScreen() {
                 ]}>
                 <ThemedText style={{ fontSize: 26 }}>⏳</ThemedText>
                 <ThemedText type="caption" themeColor="textMuted">
-                  TIMELINE EVENTS
+                  TIMELINE DECADES
+                </ThemedText>
+                <ThemedText type="editorialHeader" style={{ color: theme.primary }}>
+                  {periodsExploredCount}
+                </ThemedText>
+                <ThemedText type="caption" themeColor="textSecondary">
+                  Decades Explored
+                </ThemedText>
+              </Pressable>
+
+              {/* 2. Historical Events */}
+              <Pressable
+                onPress={() => router.push('/explore')}
+                style={({ pressed }) => [
+                  styles.explorationCard,
+                  { backgroundColor: theme.card, borderColor: theme.cardBorder },
+                  pressed && styles.pressed,
+                ]}>
+                <ThemedText style={{ fontSize: 26 }}>🏛️</ThemedText>
+                <ThemedText type="caption" themeColor="textMuted">
+                  HISTORICAL EVENTS
                 </ThemedText>
                 <ThemedText type="editorialHeader" style={{ color: theme.primary }}>
                   {timelineEventsCount}
                 </ThemedText>
                 <ThemedText type="caption" themeColor="textSecondary">
-                  Milestones Explored
+                  Documented Events
                 </ThemedText>
               </Pressable>
 
-              {/* 5. Heritage Voices */}
+              {/* 3. Learn Subtopics */}
+              <Pressable
+                onPress={() => router.push('/learn')}
+                style={({ pressed }) => [
+                  styles.explorationCard,
+                  { backgroundColor: theme.card, borderColor: theme.cardBorder },
+                  pressed && styles.pressed,
+                ]}>
+                <ThemedText style={{ fontSize: 26 }}>📖</ThemedText>
+                <ThemedText type="caption" themeColor="textMuted">
+                  LEARN SUBTOPICS
+                </ThemedText>
+                <ThemedText type="editorialHeader" style={{ color: theme.primary }}>
+                  {learnSubtopicsCount}
+                </ThemedText>
+                <ThemedText type="caption" themeColor="textSecondary">
+                  Subtopics Explored
+                </ThemedText>
+              </Pressable>
+
+              {/* 4. Heritage Voices */}
               <Pressable
                 onPress={() => router.push('/heritage-voices')}
                 style={({ pressed }) => [
@@ -399,7 +375,7 @@ export default function ProgressScreen() {
                 </ThemedText>
               </Pressable>
 
-              {/* 6. Aaj Ka Akhyana */}
+              {/* 5. Aaj Ka Akhyana */}
               <Pressable
                 onPress={() => router.push('/aaj-ka-akhyana')}
                 style={({ pressed }) => [

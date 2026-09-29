@@ -130,12 +130,10 @@ export default function GamesScreen() {
               <ThemedText type="sectionHeader" style={{ color: theme.primary }}>
                 02 — STRATEGY & HISTORICAL DUELS
               </ThemedText>
-              <Pressable
-                onPress={() => router.push('/game/ludo')}
-                style={({ pressed }) => [
+              <View
+                style={[
                   styles.secondaryGameRow,
                   { borderBottomColor: theme.cardBorder },
-                  pressed && styles.pressed,
                 ]}>
                 <View style={styles.gameNumCol}>
                   <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '800' }}>
@@ -196,11 +194,17 @@ export default function GamesScreen() {
                       ))}
                     </View>
                   </View>
-                  <ThemedText type="smallBold" style={{ color: theme.secondary, marginTop: 4 }}>
-                    Begin match →
-                  </ThemedText>
+
+                  <View style={{ marginTop: Spacing.four, gap: Spacing.two }}>
+                    <Button
+                      title="PLAY LUDO: LEGENDS OF CIVILIZATION →"
+                      size="lg"
+                      variant="action"
+                      onPress={() => router.push('/game/ludo')}
+                    />
+                  </View>
                 </View>
-              </Pressable>
+              </View>
             </View>
           ) : null}
         </View>

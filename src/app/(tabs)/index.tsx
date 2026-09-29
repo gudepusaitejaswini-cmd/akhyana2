@@ -269,13 +269,13 @@ export default function HomeScreen() {
                   chronology, and primary source evidence.
                 </ThemedText>
                 <Pressable
-                  onPress={() => router.push('/explore')}
+                  onPress={() => router.push('/learn')}
                   style={({ pressed }) => [
                     styles.cardActionBtn,
                     pressed && styles.btnPressed,
                   ]}>
                   <ThemedText style={styles.cardActionText}>
-                    BROWSE ALL EVENTS →
+                    LEARN HISTORICAL EVENTS →
                   </ThemedText>
                 </Pressable>
               </View>
@@ -581,6 +581,7 @@ export default function HomeScreen() {
             <View style={styles.footerNavLinks}>
               <Pressable onPress={() => router.push('/')}><ThemedText style={styles.footerNavLink}>Home</ThemedText></Pressable>
               <Pressable onPress={() => router.push('/explore')}><ThemedText style={styles.footerNavLink}>Explore</ThemedText></Pressable>
+              <Pressable onPress={() => router.push('/learn')}><ThemedText style={styles.footerNavLink}>Learn</ThemedText></Pressable>
               <Pressable onPress={() => router.push('/games')}><ThemedText style={styles.footerNavLink}>Games</ThemedText></Pressable>
               <Pressable onPress={() => router.push('/aaj-ka-akhyana')}><ThemedText style={styles.footerNavLink}>Aaj Ka Akhyana</ThemedText></Pressable>
               <Pressable onPress={() => router.push('/heritage-voices')}><ThemedText style={styles.footerNavLink}>Heritage Voices</ThemedText></Pressable>

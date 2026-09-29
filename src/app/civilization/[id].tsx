@@ -82,7 +82,7 @@ export default function CivilizationDetailScreen() {
                 variant="action"
                 onPress={() => {
                   setActiveCivilizationId(civilization.id);
-                  router.push('/');
+                  router.push('/learn');
                 }}
                 style={styles.startLearningButton}
               />

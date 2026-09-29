@@ -62,7 +62,7 @@ export default function DecadeScreen() {
                   recordTimelineEventViewed(event.id);
                   setActiveDecadeId(window.id);
                   setActiveEventId(event.id);
-                  router.push({ pathname: '/', params: { eventId: event.id } });
+                  router.push({ pathname: '/learn', params: { eventId: event.id } });
                 }}
                 style={({ pressed }) => [
                   styles.event,

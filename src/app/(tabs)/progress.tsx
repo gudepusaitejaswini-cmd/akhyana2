@@ -341,7 +341,7 @@ export default function ProgressScreen() {
 
               {/* 3. Exhibits Viewed */}
               <Pressable
-                onPress={() => router.push('/')}
+                onPress={() => router.push('/learn')}
                 style={({ pressed }) => [
                   styles.explorationCard,
                   { backgroundColor: theme.card, borderColor: theme.cardBorder },

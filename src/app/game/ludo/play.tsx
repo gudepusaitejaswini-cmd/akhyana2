@@ -42,6 +42,7 @@ function LudoPlay({ players }: { players: NonNullable<ReturnType<typeof getLudoS
   const discovery = LUDO_DISCOVERIES.find((item) => item.id === state.pendingDiscovery?.discoveryId);
 
   const [showNextYearPicker, setShowNextYearPicker] = useState(false);
+  const [showRulesModal, setShowRulesModal] = useState(false);
   const availableYears = useMemo(() => getYearsWithQuestions(), []);
 
   const hasLegalMovesForEarnedDistance = legalTokenIdsWithDistance(state, game.correctAnswersCount).length > 0;
@@ -64,9 +65,13 @@ function LudoPlay({ players }: { players: NonNullable<ReturnType<typeof getLudoS
             {/* AREA 1: Top Navigation Bar & Quiz Year Badge */}
             <View style={styles.topBar}>
               <Button title="← SETUP" size="sm" variant="text" onPress={() => router.replace('/game/ludo')} />
-              <ThemedText type="smallBold" style={[styles.gameTitle, { color: theme.primary }]}>
-                CHAUPAR
-              </ThemedText>
+              <Pressable
+                onPress={() => setShowRulesModal(true)}
+                style={({ pressed }) => [styles.rulesBtn, pressed && { opacity: 0.7 }]}>
+                <ThemedText type="smallBold" style={[styles.gameTitle, { color: theme.primary }]}>
+                  CHAUPAR ℹ️
+                </ThemedText>
+              </Pressable>
               <View style={styles.yearStatusBadge}>
                 <ThemedText type="smallBold">QUIZ: {game.quizYear}</ThemedText>
                 {game.quizPhase === 'retry' ? (
@@ -232,6 +237,27 @@ function LudoPlay({ players }: { players: NonNullable<ReturnType<typeof getLudoS
         </View>
       </Modal>
 
+      {/* How to Play Chaupar Rules Modal */}
+      <Modal visible={showRulesModal} transparent animationType="fade">
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalCard, { backgroundColor: theme.card, borderColor: theme.border, maxWidth: 440 }]}>
+            <ThemedText type="cardTitle">HOW TO PLAY — CHAUPAR</ThemedText>
+            <ThemedText type="caption" themeColor="textSecondary">
+              Answer six historical questions. Your number of correct answers determines how many spaces you can move.
+            </ThemedText>
+            <View style={{ gap: Spacing.two, marginVertical: Spacing.one }}>
+              <ThemedText type="small">1. NO DICE: Each player turn consists of exactly 6 historical questions.</ThemedText>
+              <ThemedText type="small">2. MOVEMENT: 0 correct = 0 spaces, up to 6 correct = 6 spaces.</ThemedText>
+              <ThemedText type="small">3. TOKEN MOVE: After answering all 6, tap any legal token to advance.</ThemedText>
+              <ThemedText type="small">4. SAFE HAVENS: Star cells protect tokens from duels.</ThemedText>
+              <ThemedText type="small">5. HISTORICAL DUELS: Landing on opponent tokens triggers a timed knowledge duel.</ThemedText>
+              <ThemedText type="small">6. VICTORY: Be the first to bring all 4 civilization tokens to the center.</ThemedText>
+            </View>
+            <Button title="Close" variant="primary" size="sm" onPress={() => setShowRulesModal(false)} />
+          </View>
+        </View>
+      </Modal>
+
       {state.phase === 'discovery' && discovery ? (
         <LudoDiscoveryOverlay discovery={discovery} onContinue={game.continueDiscovery} />
       ) : null}
@@ -245,6 +271,7 @@ const styles = StyleSheet.create({
   center: { width: '100%', maxWidth: MaxContentWidth, flex: 1 },
   section: { paddingHorizontal: Spacing.three, gap: Spacing.two, flex: 1 },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  rulesBtn: { paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
   gameTitle: { letterSpacing: 0.5, fontWeight: '800' },
   yearStatusBadge: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one },
   completionBanner: {

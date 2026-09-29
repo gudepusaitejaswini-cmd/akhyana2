@@ -176,9 +176,9 @@ export default function GamesScreen() {
                     <View style={styles.stepsList}>
                       {[
                         { step: '01', title: 'CHOOSE TOPICS', desc: 'Choose the historical topics from which the game will ask questions.' },
-                        { step: '02', title: 'ROLL', desc: 'Every dice roll is generated through 6 rapid-fire easy history questions.' },
-                        { step: '03', title: 'ANSWER', desc: 'The player answers all 6 questions.' },
-                        { step: '04', title: 'MOVE', desc: 'The number of correct answers (0–6) becomes the dice value.' },
+                        { step: '02', title: '6-QUESTION QUIZ', desc: 'Answer six historical questions on each turn. There is zero dice luck.' },
+                        { step: '03', title: 'SCORE', desc: 'The player answers all 6 questions to earn movement steps.' },
+                        { step: '04', title: 'TOKEN MOVEMENT', desc: 'Your number of correct answers (0–6) determines how many spaces you can move.' },
                         { step: '05', title: 'HISTORICAL DUEL', desc: "If an attacking token lands on an opponent's token, trigger the 5-second Historical Duel." },
                         { step: '06', title: 'CAPTURE OR DEFEND', desc: 'Both players receive the same history question. The correct/fastest response determines whether the attacking player captures the token or the defender stops the attack.' },
                       ].map((item) => (

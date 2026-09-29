@@ -40,7 +40,7 @@ export const GAME_MODULES: GameModule[] = [
     progressPercent: 0,
     illustrationKey: 'ludo-legends',
     learningLoop:
-      'Roll → Move → Discover → Learn → Historical Duel → Capture/Defend → Collect → Progress',
+      '6-Question Quiz → Movement (0–6) → Board Move → Historical Duel → Capture/Defend → Victory',
     gameplayPreview:
       'When an attacking token lands on an opponent, a 5-second Historical Duel decides capture or defence.',
     xpReward: 200,

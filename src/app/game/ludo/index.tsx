@@ -26,6 +26,7 @@ export default function LudoSetupScreen() {
   const [selectedYear, setSelectedYear] = useState<number>(1956);
   const [customYearInput, setCustomYearInput] = useState<string>('');
   const [playerNames, setPlayerNames] = useState<string[]>(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+  const [showHowToPlay, setShowHowToPlay] = useState<boolean>(false);
 
   const seats = useMemo(() => seatsForPlayerCount(count), [count]);
   const availableYears = useMemo(() => getYearsWithQuestions(), []);
@@ -85,8 +86,49 @@ export default function LudoSetupScreen() {
               LOCAL 2–4 PLAYER PASS-AND-PLAY
             </ThemedText>
             <ThemedText type="editorialLead" themeColor="textSecondary">
-              Roll the dice to determine questions; your correct answers determine your movement distance!
+              Answer six historical questions. Your number of correct answers determines how many spaces you can move.
             </ThemedText>
+
+            <Pressable
+              onPress={() => setShowHowToPlay((prev) => !prev)}
+              style={({ pressed }) => [
+                styles.howToPlayBtn,
+                { backgroundColor: theme.primaryLight, borderColor: theme.primary },
+                pressed && { opacity: 0.8 },
+              ]}>
+              <ThemedText type="smallBold" style={{ color: theme.primary }}>
+                {showHowToPlay ? '▲ HIDE HOW TO PLAY' : '📖 HOW TO PLAY / RULES'}
+              </ThemedText>
+            </Pressable>
+
+            {showHowToPlay && (
+              <View style={[styles.howToPlayCard, { backgroundColor: theme.card, borderColor: theme.cardBorder }]}>
+                <ThemedText type="cardTitle" style={{ color: theme.primary, marginBottom: 4 }}>
+                  CHAUPAR GAME RULES
+                </ThemedText>
+                <ThemedText type="caption" themeColor="textSecondary" style={{ marginBottom: 8 }}>
+                  A pure strategy and knowledge board game. There is zero dice luck.
+                </ThemedText>
+                {[
+                  { step: '01', title: '6-QUESTION QUIZ', desc: 'Each turn, the player answers six historical questions from the selected year.' },
+                  { step: '02', title: 'SCORE TO MOVEMENT', desc: 'Your number of correct answers (0–6) determines how many spaces you can move (0 correct = 0 spaces, 6 correct = 6 spaces).' },
+                  { step: '03', title: 'TOKEN MOVEMENT', desc: 'Select any active token on the board to move forward by your exact earned spaces.' },
+                  { step: '04', title: 'PASS AND PLAY', desc: 'Pass the device to the next player after completing your move.' },
+                  { step: '05', title: 'HISTORICAL DUEL', desc: 'Landing on an opponent token triggers a 5-second Historical Duel: fastest correct answer captures or defends!' },
+                  { step: '06', title: 'SAFE CELLS', desc: 'Cells marked with star symbols are safe sanctuaries from captures.' },
+                ].map((item) => (
+                  <View key={item.step} style={styles.ruleItem}>
+                    <ThemedText type="annotation" style={{ color: theme.secondary, fontWeight: '800', width: 24 }}>
+                      {item.step}
+                    </ThemedText>
+                    <View style={{ flex: 1 }}>
+                      <ThemedText type="smallBold" style={{ color: theme.text }}>{item.title}</ThemedText>
+                      <ThemedText type="caption" themeColor="textSecondary">{item.desc}</ThemedText>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
 
           <HairlineDivider verticalMargin="md" />
@@ -299,5 +341,27 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Spacing.two,
+  },
+  howToPlayBtn: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.one,
+  },
+  howToPlayCard: {
+    borderWidth: 1,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.three,
+    marginTop: Spacing.two,
+    gap: Spacing.two,
+  },
+  ruleItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.two,
+    paddingVertical: 2,
   },
 });

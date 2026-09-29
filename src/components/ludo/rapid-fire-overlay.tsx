@@ -78,7 +78,7 @@ export function RapidFireOverlay({ playerName, onComplete }: { playerName: strin
           </ThemedText>
           
           <View style={{ marginVertical: 24, alignItems: 'center' }}>
-            <ThemedText type="smallBold" themeColor="textSecondary">YOUR DICE</ThemedText>
+            <ThemedText type="smallBold" themeColor="textSecondary">SPACES TO MOVE</ThemedText>
             <View style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: theme.primary, alignItems: 'center', justifyContent: 'center', marginTop: 8 }}>
               <ThemedText type="heroDisplay" style={{ color: theme.primaryText }}>{score}</ThemedText>
             </View>

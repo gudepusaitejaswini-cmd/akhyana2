@@ -5,8 +5,44 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "source": "/decade/:id",
+      "destination": "/decade/[id].html"
+    },
+    {
+      "source": "/civilization/:id",
+      "destination": "/civilization/[id].html"
+    },
+    {
+      "source": "/period/:id",
+      "destination": "/period/[id].html"
+    },
+    {
+      "source": "/topic/:id",
+      "destination": "/topic/[id].html"
+    },
+    {
+      "source": "/experience/:id",
+      "destination": "/experience/[id].html"
+    },
+    {
+      "source": "/game/chronosearch/:puzzleId",
+      "destination": "/game/chronosearch/[puzzleId].html"
+    },
+    {
+      "source": "/heritage-voices/article/:id",
+      "destination": "/heritage-voices/article/[id].html"
+    },
+    {
+      "source": "/heritage-voices/author/:id",
+      "destination": "/heritage-voices/author/[id].html"
+    },
+    {
+      "source": "/learn/:eventId/:subtopicId",
+      "destination": "/learn/[eventId]/[subtopicId].html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/"
     }
   ]
 }
